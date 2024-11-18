@@ -59,3 +59,13 @@
      :note (second notes)}))
 
 
+;; 6. User Story - Track Reading Progress
+(defn track-reading-progress []
+  (let [reading-log {:book "1984" :total-pages 328 :pages-read 164}]
+    (assoc reading-log :progress (double (* 100 (/ (:pages-read reading-log) (:total-pages reading-log)))))))
+
+
+;; 7. User Story - Leave Personal Notes About a Book
+;; 8. User Story - View Book Reviews
+;; 9. User Story - Notify Users About New Books by Their Favorite Author
+;; 10. User Stroy - Subscribe to Someone's Book List
