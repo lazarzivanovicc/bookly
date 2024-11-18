@@ -20,6 +20,7 @@
 (defroutes app-routes
   (GET "/" [] "Hello World")
   (GET "/api/reading-list" [] (ring-response/response (generate-reading-list)))
+  (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))
   (route/not-found "Not Found"))
 
 
