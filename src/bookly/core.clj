@@ -22,6 +22,7 @@
   (GET "/api/reading-list" [] (ring-response/response (generate-reading-list)))
   (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))
   (GET "/api/recommendations-by-genre" [] (ring-response/response (recommend-by-genre)))
+  (GET "/api/recommendations-by-author" [] (ring-response/response (recommend-by-author)))
   (route/not-found "Not Found"))
 
 

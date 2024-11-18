@@ -36,3 +36,14 @@
     {:genre selected-genre
      :books (genres selected-genre)}))
 
+
+
+;; 4. User Story - Get Book Recommendations by Favorite Author
+(defn recommend-by-author []
+  (let [user {:preferred-author "George Orwell"}
+        authors {"J.K. Rowling" ["Harry Potter and the Philosopher's Stone"
+                                 "Harry Potter and the Chamber of Secrets"]
+                 "George Orwell" ["1984" "Animal Farm"]}
+        selected-author (first (filter #(= (:preferred-author user) %) (keys authors)))]
+    {:author selected-author
+     :books (authors selected-author)}))
