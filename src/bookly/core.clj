@@ -23,6 +23,7 @@
   (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))
   (GET "/api/recommendations-by-genre" [] (ring-response/response (recommend-by-genre)))
   (GET "/api/recommendations-by-author" [] (ring-response/response (recommend-by-author)))
+  (GET "/api/create-reading-reminder" [] (ring-response/response (create-reading-reminder)))
   (route/not-found "Not Found"))
 
 

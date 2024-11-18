@@ -30,6 +30,10 @@
 (fact "Test recommendations by user's preferred author"
       (recommend-by-author) => {:author "George Orwell", :books ["1984" "Animal Farm"]})
 
+
+(fact "Test reading reminder generation"
+      (create-reading-reminder) => {:book "1984", :reminder-time "Evening", :note "Read for an hour"})
+
 ;; TODO
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
 ;; Possibly organize tests in groups (facts is used as a container for multiple fact statements), single simple test case should be represented with a fact

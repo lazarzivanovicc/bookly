@@ -47,3 +47,15 @@
         selected-author (first (filter #(= (:preferred-author user) %) (keys authors)))]
     {:author selected-author
      :books (authors selected-author)}))
+
+
+;; 5. User Story - Generate Reading Reminder
+(defn create-reading-reminder []
+  (let [books ["1984" "Dune" "The Great Gatsby" "The Hobbit"]
+        times ["Morning" "Evening"]
+        notes ["Read for 30 minutes", "Read for an hour"]]
+    {:book (first books)
+     :reminder-time (second times)
+     :note (second notes)}))
+
+
