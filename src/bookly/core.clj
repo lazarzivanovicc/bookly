@@ -21,6 +21,7 @@
   (GET "/" [] "Hello World")
   (GET "/api/reading-list" [] (ring-response/response (generate-reading-list)))
   (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))
+  (GET "/api/recommendations-by-genre" [] (ring-response/response (recommend-by-genre)))
   (route/not-found "Not Found"))
 
 
