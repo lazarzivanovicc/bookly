@@ -25,6 +25,8 @@
   (GET "/api/recommendations-by-author" [] (ring-response/response (recommend-by-author)))
   (GET "/api/create-reading-reminder" [] (ring-response/response (create-reading-reminder)))
   (GET "/api/track-reading-progress" [] (ring-response/response (track-reading-progress)))
+  (GET "/api/extend-user-streak" [] (ring-response/response (extend-user-streak)))
+  (GET "/api/get-book-reviews" [] (ring-response/response (get-book-reviews)))
   (route/not-found "Not Found"))
 
 

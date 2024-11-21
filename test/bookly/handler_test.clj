@@ -38,6 +38,15 @@
 (fact "Test reading progress tracker"
       (track-reading-progress) => {:book "1984", :total-pages 328, :pages-read 164, :progress 50.0})
 
+
+(fact "Test streak extension"
+      (extend-user-streak) => {:streak {:total 11, :claimed-today true}})
+
+
+(fact "Test Book Review fetch"
+      (get-book-reviews) =not=> nil)
+
+
 ;; TODO
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
 ;; Possibly organize tests in groups (facts is used as a container for multiple fact statements), single simple test case should be represented with a fact

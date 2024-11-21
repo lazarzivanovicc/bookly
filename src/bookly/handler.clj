@@ -49,7 +49,7 @@
      :books (authors selected-author)}))
 
 
-;; 5. User Story - Generate Reading Reminder
+;; 5. User Story - User Generates Reading Reminder
 (defn create-reading-reminder []
   (let [books ["1984" "Dune" "The Great Gatsby" "The Hobbit"]
         times ["Morning" "Evening"]
@@ -59,13 +59,44 @@
      :note (second notes)}))
 
 
-;; 6. User Story - Track Reading Progress
+;; 6. User Story - Track Reading Progress of a User
 (defn track-reading-progress []
   (let [reading-log {:book "1984" :total-pages 328 :pages-read 164}]
     (assoc reading-log :progress (double (* 100 (/ (:pages-read reading-log) (:total-pages reading-log)))))))
 
 
 ;; 7. User Story - Leave Personal Notes About a Book
-;; 8. User Story - View Book Reviews
-;; 9. User Story - Notify Users About New Books by Their Favorite Author
-;; 10. User Stroy - Subscribe to Someone's Book List
+
+
+;; 8. User Story - User wants to See Book Reviews
+(defn get-book-reviews []
+  (let [reviews {"1984" [{:user "Anna" :rating 5 :review "Fantastic book!"}
+                         {:user "John" :rating 4 :review "Depresive!"}]
+                 "The Hobbit" [{:user "Steve" :rating 5 :review "Pure magic!"}
+                               {:user "Nicolas" :rating 4 :review "Great but little bit too slow."}]}
+        selected-book (rand-nth (keys reviews))]
+    {:book selected-book
+     :reviews (reviews selected-book)}))
+
+
+;; 9. User Story - User Wants to See Overall Sentiment of the Book Reviews
+;; I will use https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest to get sentiment of each individual review
+;; And I will have total_positive/total_negative/total_neutral by book 
+
+
+;; 10. User Story - Notify Users About New Books by Their Favorite Author
+
+
+;; 11. User Story - User Subscribes to Someone's Book List
+
+
+;; 12. User Story - User Extends his/her Reading Streak by checking-in for a Reading Session - 
+(defn extend-user-streak []
+  (let [user {:streak {:total 10 :claimed-today false}}]
+    (if (not (get-in user [:streak :claimed-today]))
+      (assoc-in (assoc-in user [:streak :claimed-today] true) [:streak :total] (inc (get-in user [:streak :total])))
+      user)))
+
+;; 13. User Story - User Spends his Streak to buy a Book
+
+(extend-user-streak)
