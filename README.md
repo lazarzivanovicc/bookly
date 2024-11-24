@@ -34,6 +34,111 @@
 
 ### User Story 15: User Wants to Receive Notifications for Book Deals
 
+## Models
+
+Based on the **User Stories** the following models were created:
+
+**User**
+
+- ID
+- First Name
+- Last Name
+- Email
+- Password
+- Streak Count
+- Streak Claimed Today
+- Role ID
+- Created At
+- Updated At
+
+**Book**
+
+- ID
+- Title
+- Authors
+- Genres
+- Num. Pages
+- Price
+- Image
+- Description
+- Publisher
+- Publish Date
+- Created At
+- Updated At
+
+**Review**
+
+- BookID
+- UserID
+- Text
+- Rating Score
+- Sentiment
+- Created At
+- Updated At
+
+**Role**
+
+- ID
+- Name
+- Created At
+- Updated At
+
+**Note**
+
+- ID
+- UserID
+- BookID
+- Note Text
+- Created At
+- Updated At
+
+**ReadingReminder**
+
+- ID
+- UserID
+- BookID
+- Reminder Time (datetime)
+- Note Text
+- Created At
+- Updated At
+
+**ReadingProgress**
+
+- UserID
+- BookID
+- Pages Read
+- Created At
+- Updated At
+
+**Collection**
+
+- ID
+- Name
+- Owner - UserID
+- Created At
+- Update At
+
+**CollectionBook**
+
+- CollectionID
+- BookID
+- Created At
+- Update At
+
+**CollectionUser**
+
+- CollectionID
+- UserID
+- Created At
+- Update At
+
+**CollectionType**
+
+- ID
+- Name
+- Created At
+- Updated At
+
 ## Prerequisites
 
 You will need [Leiningen][] 2.0.0 or above installed.
