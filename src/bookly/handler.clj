@@ -59,7 +59,7 @@
      :note (second notes)}))
 
 
-;; 6. User Story - Track Reading Progress of a User
+;; 6. User Story - Track Reading Progress of a User 
 (defn track-reading-progress []
   (let [reading-log {:book "1984" :total-pages 328 :pages-read 164}]
     (assoc reading-log :progress (double (* 100 (/ (:pages-read reading-log) (:total-pages reading-log)))))))
@@ -87,10 +87,10 @@
 ;; 10. User Story - Notify Users About New Books by Their Favorite Author
 
 
-;; 11. User Story - User Subscribes to Someone's Book List
+;; 11. User Story - User Subscribes to Someone's Book List - they will get the notification
 
 
-;; 12. User Story - User Extends his/her Reading Streak by checking-in for a Reading Session - 
+;; 12. User Story - User Extends his/her Reading Streak by checking-in for a Reading Session  
 (defn extend-user-streak []
   (let [user {:streak {:total 10 :claimed-today false}}]
     (if (not (get-in user [:streak :claimed-today]))
@@ -99,4 +99,8 @@
 
 ;; 13. User Story - User Spends his Streak to buy a Book
 
-(extend-user-streak)
+;; 14. User Story - User Sets and Tracks Personal Reading Goals
+
+;; 15. User Story - User Receives Notifications for Book Deals
+;; I as a User, I want to receive notifications about discounts or deals on books in my wish list or by my favorite authors.
+
