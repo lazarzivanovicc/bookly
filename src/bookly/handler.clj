@@ -1,6 +1,11 @@
 (ns bookly.handler
-  (:require [compojure.core :refer :all]))
+  (:require [compojure.core :refer :all]
+            [next.jdbc :as jdbc]
+            [bookly.resources :refer [db]]))
 
+
+;; Checking DB Connection
+(jdbc/execute! db ["select * from users"])
 
 ;; 1. User Story - Generate list of books to read
 (defn generate-reading-list []
