@@ -16,4 +16,5 @@
   :ring {:handler bookly.core/app}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring/ring-mock "0.3.2"]]}})
+                        [ring/ring-mock "0.3.2"]
+                        [criterium "0.4.6"]]}})

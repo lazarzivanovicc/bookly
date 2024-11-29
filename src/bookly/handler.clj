@@ -7,6 +7,13 @@
 ;; Checking DB Connection
 (jdbc/execute! db ["select * from users"])
 
+;; ===== Registration and Login =====
+
+(defn login
+  [request]
+  (get-in request [:body "username"]))
+
+;; ===== User Stories =====
 ;; 1. User Story - Generate list of books to read
 (defn generate-reading-list []
   (let [all-books ["1984" "Brave New World" "The Great Gatsby" "Dune" "The Hobbit"]

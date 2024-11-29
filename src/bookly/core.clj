@@ -1,7 +1,7 @@
 (ns bookly.core
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.json :as ring-json]
             [ring.util.response :as ring-response]
             [bookly.handler :refer :all]))
@@ -19,6 +19,7 @@
 
 (defroutes app-routes
   (GET "/" [] "Hello World")
+  (POST "/api/login" req (ring-response/response (login req)))
   (GET "/api/reading-list" [] (ring-response/response (generate-reading-list)))
   (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))
   (GET "/api/recommendations-by-genre" [] (ring-response/response (recommend-by-genre)))
@@ -34,5 +35,6 @@
 (def app
   (-> app-routes
       (wrap-default-content-type)
-      (wrap-defaults site-defaults)
+      (wrap-defaults api-defaults)
+      (ring-json/wrap-json-body)
       (ring-json/wrap-json-response)))
