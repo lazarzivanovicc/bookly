@@ -1,21 +1,23 @@
 (ns bookly.handler
   (:require [compojure.core :refer :all]
             [next.jdbc :as jdbc]
-            [bookly.resources :refer [db]]))
+            [bookly.resources :refer [db]]
+            [buddy.hashers :as hashers]))
 
 
 ;; Checking DB Connection
 (jdbc/execute! db ["select * from users"])
 
 ;; ===== Registration and Login =====
-
 (def users (atom {"LazarZivanovicc"
                   {:first-name "Lazar",
                    :last-name "Zivanovic",
                    :username "LazarZivanovicc",
                    :password "fakepass1"}}))
 
-;; TODO - check if user already exists, hash pass, create token [check buddy library]
+;; (hashers/verify "secretpassword" "bcrypt+sha512$4i9sd34m...") function to verify hash => {:valid true :update false}, I will use it for login
+
+;; TODO - Create token [check buddy library], check what kind of request or exception should I send if user already exists
 (defn register
   [request]
   (let [first-name (get-in request [:body "first-name"])
@@ -28,9 +30,8 @@
         (swap! users assoc username {:first-name first-name
                                      :last-name last-name
                                      :username username
-                                     :password password})
+                                     :password (hashers/derive password)})
         {:message (str "User " username " created successfully")}))))
-
 
 
 (defn login

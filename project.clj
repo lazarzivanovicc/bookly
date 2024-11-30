@@ -11,7 +11,8 @@
                  [buddy/buddy-auth "3.0.1"]
                  [com.github.seancorfield/next.jdbc "1.3.955"]
                  [org.postgresql/postgresql "42.7.4"]
-                 [com.github.seancorfield/honeysql "2.6.1230"]]
+                 [com.github.seancorfield/honeysql "2.6.1230"]
+                 [buddy/buddy-hashers "2.0.167"]]
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler bookly.core/app}
   :profiles
