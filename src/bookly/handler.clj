@@ -9,9 +9,27 @@
 
 ;; ===== Registration and Login =====
 
+(def users (atom {}))
+
+;; TODO - check if user already exists, hash pass, create token [check buddy library]
+(defn register
+  [request]
+  (let [first-name (get-in request [:body "first-name"])
+        last-name (get-in request [:body "last-name"])
+        username (get-in request [:body "username"])
+        password (get-in request [:body "password"])]
+    (swap! users assoc username {:first-name first-name
+                                 :last-name last-name
+                                 :username username
+                                 :password password})
+    {:message (str "User " username " created successfully")}))
+
+
 (defn login
   [request]
-  (get-in request [:body "username"]))
+  (let [username (get-in request [:body "username"])]
+    {:message (str username " logged-in successfully")}))
+
 
 ;; ===== User Stories =====
 ;; 1. User Story - Generate list of books to read

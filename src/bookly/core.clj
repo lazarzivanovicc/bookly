@@ -19,6 +19,7 @@
 
 (defroutes app-routes
   (GET "/" [] "Hello World")
+  (POST "/api/register" req (ring-response/response (register req)))
   (POST "/api/login" req (ring-response/response (login req)))
   (GET "/api/reading-list" [] (ring-response/response (generate-reading-list)))
   (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))

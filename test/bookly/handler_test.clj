@@ -48,7 +48,11 @@
 
 
 (fact "Register test"
-      (get-book-reviews) =not=> nil)
+      (let [req {:body {"username" "Jovan"
+                        "first-name" "Jovan"
+                        "last-name" "Zivanovic"
+                        "password" "fakepass"}}]
+        (register req) =not=> nil))
 
 
 (fact "Login test"
