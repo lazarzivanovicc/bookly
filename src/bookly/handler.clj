@@ -1,12 +1,13 @@
 (ns bookly.handler
   (:require
    [bookly.resources :refer [db]]
+   [bookly.http-helpers :refer :all]
    [buddy.hashers :as hashers]
    [buddy.sign.jwt :as jwt]
    [clj-time.core :as time]
    [compojure.core :refer :all]
    [next.jdbc :as jdbc]
-   [buddy.auth :refer [authenticated? throw-unauthorized]]
+   [buddy.auth :refer [authenticated?]]
    [dotenv :refer [env]]))
 
 ;; Checking DB Connection
@@ -22,10 +23,10 @@
 
 (def secret (env "SECRET_KEY"))
 
-;; Create helper functions for different kinds of requests for example (defn response-ok [message] {:status 200 :body message}) 
-;; Add role support - (:identity req) returns claims map so I can pack the role inside claims when creating JWT
+;; TODO - Use http helper functions
+;; TODO - Try honeysql
+;; TODO - Add role support - (:identity req) returns claims map so I can pack the role inside claims when creating JWT
 ;; And check if the function can be exec by the user with a give role
-
 
 ;; TODO - Check what kind of request or exception should I send if user already exists
 (defn register
@@ -67,8 +68,8 @@
   (if (authenticated? req)
     (let [all-books ["1984" "Brave New World" "The Great Gatsby" "Dune" "The Hobbit"]
           to-read-count (rand-int 5)]
-      {:status 200 :body {:to-read (take to-read-count (shuffle all-books))}})
-    (throw-unauthorized)))
+      (response-ok {:to-read (take to-read-count (shuffle all-books))}))
+    (response-unauthorized "Unauthorized")))
 
 
 ;; 2. User Story - Generate and View Statistics of Book Collection
