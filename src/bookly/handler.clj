@@ -1,8 +1,12 @@
 (ns bookly.handler
-  (:require [compojure.core :refer :all]
-            [next.jdbc :as jdbc]
-            [bookly.resources :refer [db]]
-            [buddy.hashers :as hashers]))
+  (:require
+   [bookly.resources :refer [db]]
+   [buddy.hashers :as hashers]
+   [buddy.sign.jwt :as jwt]
+   [clj-time.core :as time]
+   [compojure.core :refer :all]
+   [next.jdbc :as jdbc]
+   [buddy.auth :refer [authenticated? throw-unauthorized]]))
 
 
 ;; Checking DB Connection
@@ -15,7 +19,15 @@
                    :username "LazarZivanovicc",
                    :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}}))
 
-;; TODO - Create token [check buddy library], check what kind of request or exception should I send if user already exists
+;; TDOD - Secret should be stored in ENV
+(def secret "secret")
+
+;; Create helper functions for different kinds of requests for example (defn response-ok [message] {:status 200 :body message}) 
+;; Add role support - (:identity req) returns claims map so I can pack the role inside claims when creating JWT
+;; And check if the function can be exec by the user with a give role
+
+
+;; TODO - Check what kind of request or exception should I send if user already exists
 (defn register
   [request]
   (let [first-name (get-in request [:body "first-name"])
@@ -28,7 +40,9 @@
         (swap! users assoc username {:first-name first-name
                                      :last-name last-name
                                      :username username
-                                     :password (hashers/derive password)})
+                                     :password (hashers/derive password)
+                                     :created-at (time/now)
+                                     :updated-at (time/now)})
         {:message (str "User " username " created successfully")}))))
 
 
@@ -38,17 +52,23 @@
         password (get-in request [:body "password"])]
     (if (contains? @users username)
       (if (:valid (hashers/verify password (:password (get @users username))))
-        {:message (str username " logged-in successfully")}
+        (let [claims {:username username
+                      :exp (time/plus (time/now) (time/seconds 86400))}
+              token  (jwt/sign claims secret {:alg :hs512})]
+          {:message (str username " logged-in successfully") :token token})
         {:message "Invalid login data please try again"})
       {:message "Invalid login data please try again"})))
 
 
 ;; ===== User Stories =====
 ;; 1. User Story - Generate list of books to read
-(defn generate-reading-list []
-  (let [all-books ["1984" "Brave New World" "The Great Gatsby" "Dune" "The Hobbit"]
-        to-read-count (rand-int 5)]
-    {:to-read (take to-read-count (shuffle all-books))}))
+(defn generate-reading-list
+  [req]
+  (if (authenticated? req)
+    (let [all-books ["1984" "Brave New World" "The Great Gatsby" "Dune" "The Hobbit"]
+          to-read-count (rand-int 5)]
+      {:status 200 :body {:to-read (take to-read-count (shuffle all-books))}})
+    (throw-unauthorized)))
 
 
 ;; 2. User Story - Generate and View Statistics of Book Collection
@@ -145,4 +165,6 @@
 
 ;; 15. User Story - User Receives Notifications for Book Deals
 ;; I as a User, I want to receive notifications about discounts or deals on books in my wish list or by my favorite authors.
+
+;; 
 

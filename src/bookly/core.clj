@@ -4,8 +4,13 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.json :as ring-json]
             [ring.util.response :as ring-response]
-            [bookly.handler :refer :all]))
+            [bookly.handler :refer :all]
+            [buddy.auth.backends.token :refer [jws-backend]]
+            [buddy.auth.middleware :refer [wrap-authentication]]))
 
+
+;; Extract secret from env
+(def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
 
 (defn wrap-default-content-type
   "Middleware that appends Content-Type application/json as default"
@@ -21,7 +26,7 @@
   (GET "/" [] "Hello World")
   (POST "/api/register" req (ring-response/response (register req)))
   (POST "/api/login" req (ring-response/response (login req)))
-  (GET "/api/reading-list" [] (ring-response/response (generate-reading-list)))
+  (GET "/api/reading-list" req (ring-response/response (generate-reading-list req)))
   (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))
   (GET "/api/recommendations-by-genre" [] (ring-response/response (recommend-by-genre)))
   (GET "/api/recommendations-by-author" [] (ring-response/response (recommend-by-author)))
@@ -38,4 +43,5 @@
       (wrap-default-content-type)
       (wrap-defaults api-defaults)
       (ring-json/wrap-json-body)
-      (ring-json/wrap-json-response)))
+      (ring-json/wrap-json-response)
+      (wrap-authentication auth-backend)))

@@ -2,21 +2,15 @@
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
             [bookly.core :refer :all]
+            [buddy.sign.jwt :as jwt]
+            [clj-time.core :as time]
             [bookly.handler :refer :all]
             [midje.sweet :refer :all]))
 
-;; (deftest test-app
-;;   (testing "main route"
-;;     (let [response (app (mock/request :get "/"))]
-;;       (is (= (:status response) 200))
-;;       (is (= (:body response) "Hello World"))))
-
-;;   (testing "not-found route"
-;;     (let [response (app (mock/request :get "/invalid"))]
-;;       (is (= (:status response) 404)))))
 
 (fact "Test fetching of user reading list"
-      (generate-reading-list) =not=> nil)
+      (let [req {:body {}}]
+        (generate-reading-list req) =not=> nil))
 
 
 (fact "Test fetching of collection stats"
@@ -72,7 +66,10 @@
                                          "password" "fakepass"}}]
         (login req-valid) =not=> nil
         (login req-valid) => {:message (str (get-in req-valid [:body "username"])
-                                            " logged-in successfully")}
+                                            " logged-in successfully")
+                              :token (jwt/sign {:username (get-in req-valid [:body "username"])
+                                                :exp (time/plus (time/now) (time/seconds 86400))}
+                                               "secret" {:alg :hs512})}
         (login req-invalid-username) => {:message "Invalid login data please try again"}
         (login req-invalid-password) => {:message "Invalid login data please try again"}))
 
@@ -82,3 +79,4 @@
 ;; TODO
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
 ;; Possibly organize tests in groups (facts is used as a container for multiple fact statements), single simple test case should be represented with a fact
+;; Do tests run immedietly when I start the ring server?
