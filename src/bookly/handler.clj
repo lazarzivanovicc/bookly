@@ -13,9 +13,7 @@
                   {:first-name "Lazar",
                    :last-name "Zivanovic",
                    :username "LazarZivanovicc",
-                   :password "fakepass1"}}))
-
-;; (hashers/verify "secretpassword" "bcrypt+sha512$4i9sd34m...") function to verify hash => {:valid true :update false}, I will use it for login
+                   :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}}))
 
 ;; TODO - Create token [check buddy library], check what kind of request or exception should I send if user already exists
 (defn register
@@ -36,8 +34,13 @@
 
 (defn login
   [request]
-  (let [username (get-in request [:body "username"])]
-    {:message (str username " logged-in successfully")}))
+  (let [username (get-in request [:body "username"])
+        password (get-in request [:body "password"])]
+    (if (contains? @users username)
+      (if (:valid (hashers/verify password (:password (get @users username))))
+        {:message (str username " logged-in successfully")}
+        {:message "Invalid login data please try again"})
+      {:message "Invalid login data please try again"})))
 
 
 ;; ===== User Stories =====

@@ -47,7 +47,7 @@
       (get-book-reviews) =not=> nil)
 
 
-(fact "Register test"
+(fact "Registration test"
       (let [req-new-user {:body {"username" "JovanZivanovicc"
                                  "first-name" "Jovan"
                                  "last-name" "Zivanovic"
@@ -64,8 +64,17 @@
 
 
 (fact "Login test"
-      (let [req {:body {"username" "Jovan"}}]
-        (login req) =not=> nil))
+      (let [req-valid {:body {"username" "LazarZivanovicc"
+                              "password" "fakepass1"}}
+            req-invalid-username {:body {"username" "Lazar"
+                                         "password" "fakepass1"}}
+            req-invalid-password {:body {"username" "Lazar"
+                                         "password" "fakepass"}}]
+        (login req-valid) =not=> nil
+        (login req-valid) => {:message (str (get-in req-valid [:body "username"])
+                                            " logged-in successfully")}
+        (login req-invalid-username) => {:message "Invalid login data please try again"}
+        (login req-invalid-password) => {:message "Invalid login data please try again"}))
 
 
 
