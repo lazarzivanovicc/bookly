@@ -6,11 +6,11 @@
             [ring.util.response :as ring-response]
             [bookly.handler :refer :all]
             [buddy.auth.backends.token :refer [jws-backend]]
-            [buddy.auth.middleware :refer [wrap-authentication]]))
+            [buddy.auth.middleware :refer [wrap-authentication]]
+            [dotenv :refer [env]]))
 
 
-;; Extract secret from env
-(def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
+(def auth-backend (jws-backend {:secret (env "SECRET_KEY") :options {:alg :hs512}}))
 
 (defn wrap-default-content-type
   "Middleware that appends Content-Type application/json as default"

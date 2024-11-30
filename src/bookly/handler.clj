@@ -6,8 +6,8 @@
    [clj-time.core :as time]
    [compojure.core :refer :all]
    [next.jdbc :as jdbc]
-   [buddy.auth :refer [authenticated? throw-unauthorized]]))
-
+   [buddy.auth :refer [authenticated? throw-unauthorized]]
+   [dotenv :refer [env]]))
 
 ;; Checking DB Connection
 (jdbc/execute! db ["select * from users"])
@@ -19,8 +19,8 @@
                    :username "LazarZivanovicc",
                    :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}}))
 
-;; TDOD - Secret should be stored in ENV
-(def secret "secret")
+
+(def secret (env "SECRET_KEY"))
 
 ;; Create helper functions for different kinds of requests for example (defn response-ok [message] {:status 200 :body message}) 
 ;; Add role support - (:identity req) returns claims map so I can pack the role inside claims when creating JWT
