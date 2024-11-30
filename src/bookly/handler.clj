@@ -9,7 +9,11 @@
 
 ;; ===== Registration and Login =====
 
-(def users (atom {}))
+(def users (atom {"LazarZivanovicc"
+                  {:first-name "Lazar",
+                   :last-name "Zivanovic",
+                   :username "LazarZivanovicc",
+                   :password "fakepass1"}}))
 
 ;; TODO - check if user already exists, hash pass, create token [check buddy library]
 (defn register
@@ -18,11 +22,15 @@
         last-name (get-in request [:body "last-name"])
         username (get-in request [:body "username"])
         password (get-in request [:body "password"])]
-    (swap! users assoc username {:first-name first-name
-                                 :last-name last-name
-                                 :username username
-                                 :password password})
-    {:message (str "User " username " created successfully")}))
+    (if (contains? @users username)
+      {:message (str "User " username " already exists")}
+      (do
+        (swap! users assoc username {:first-name first-name
+                                     :last-name last-name
+                                     :username username
+                                     :password password})
+        {:message (str "User " username " created successfully")}))))
+
 
 
 (defn login

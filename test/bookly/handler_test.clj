@@ -48,11 +48,19 @@
 
 
 (fact "Register test"
-      (let [req {:body {"username" "Jovan"
-                        "first-name" "Jovan"
-                        "last-name" "Zivanovic"
-                        "password" "fakepass"}}]
-        (register req) =not=> nil))
+      (let [req-new-user {:body {"username" "JovanZivanovicc"
+                                 "first-name" "Jovan"
+                                 "last-name" "Zivanovic"
+                                 "password" "fakepass"}}
+            req-existing-user {:body {"username" "LazarZivanovicc"
+                                      "first-name" "Lazar"
+                                      "last-name" "Zivanovic"
+                                      "password" "fakepass1"}}]
+        (register req-new-user) =not=> nil
+        (register req-existing-user) =not=> nil
+        (register req-existing-user) =>  {:message (str "User "
+                                                        (get-in req-existing-user [:body "username"])
+                                                        " already exists")}))
 
 
 (fact "Login test"
