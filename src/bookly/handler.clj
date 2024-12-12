@@ -15,9 +15,16 @@
 
 ;; ===== Registration and Login =====
 (def users (atom {"LazarZivanovicc"
-                  {:first-name "Lazar",
+                  {:id 1
+                   :first-name "Lazar",
                    :last-name "Zivanovic",
                    :username "LazarZivanovicc",
+                   :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}
+                  "AnaDimitricc"
+                  {:id 5
+                   :first-name "Ana",
+                   :last-name "Dimitric",
+                   :username "AnaDimitricc",
                    :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}}))
 
 
@@ -28,6 +35,15 @@
                   {:id 5 :title "War and Peace" :popularity 75}
                   {:id 6 :title "Game of Thrones" :popularity 91}
                   {:id 7 :title "The Fellowship of the Ring" :popularity 94}]))
+
+(def user-book (atom [{:user-id 1 :book-id 1}
+                      {:user-id 1 :book-id 3}
+                      {:user-id 1 :book-id 5}
+                      {:user-id 5 :book-id 1}
+                      {:user-id 5 :book-id 3}
+                      {:user-id 5 :book-id 2}
+                      {:user-id 5 :book-id 7}
+                      {:user-id 5 :book-id 6}]))
 
 
 (def secret (env "SECRET_KEY"))
@@ -177,6 +193,12 @@
 ;; I as a User, I want to receive notifications about discounts or deals on books in my wish list or by my favorite authors.
 
 ;; 16. User Story - User Gets Recommendation from Users that have similar interest like him (Collaborative Filtering)
+;; Currently I return the most popular books that user has not read yet
 (defn recommend []
-  (reverse (sort-by :popularity @books)))
+  (let [user-id 1
+        user-books (filter #(= (:user-id %) user-id) @user-book)
+        book-ids (distinct (map :book-id user-books))]
+    (sort-by :popularity > (remove #(contains? (set book-ids) (:id %)) @books))))
 
+
+ 
