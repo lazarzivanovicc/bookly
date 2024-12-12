@@ -21,6 +21,15 @@
                    :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}}))
 
 
+(def books (atom [{:id 1 :title "The Hobbit" :popularity 95}
+                  {:id 2 :title "Dune" :popularity 90}
+                  {:id 3 :title "The Great Gatsby" :popularity 85}
+                  {:id 4 :title "1984" :popularity 80}
+                  {:id 5 :title "War and Peace" :popularity 75}
+                  {:id 6 :title "Game of Thrones" :popularity 91}
+                  {:id 7 :title "The Fellowship of the Ring" :popularity 94}]))
+
+
 (def secret (env "SECRET_KEY"))
 
 ;; TODO - Use http helper functions
@@ -167,5 +176,7 @@
 ;; 15. User Story - User Receives Notifications for Book Deals
 ;; I as a User, I want to receive notifications about discounts or deals on books in my wish list or by my favorite authors.
 
-;; 
+;; 16. User Story - User Gets Recommendation from Users that have similar interest like him (Collaborative Filtering)
+(defn recommend []
+  (reverse (sort-by :popularity @books)))
 

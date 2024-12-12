@@ -24,6 +24,16 @@
 (fact "Test recommendations by user's preferred author"
       (recommend-by-author) => {:author "George Orwell", :books ["1984" "Animal Farm"]})
 
+(fact "Test collaborative recommendations"
+      (recommend) =not=> nil
+      (recommend) => '({:id 1, :title "The Hobbit", :popularity 95}
+                       {:id 7, :title "The Fellowship of the Ring", :popularity 94}
+                       {:id 6, :title "Game of Thrones", :popularity 91}
+                       {:id 2, :title "Dune", :popularity 90}
+                       {:id 3, :title "The Great Gatsby", :popularity 85}
+                       {:id 4, :title "1984", :popularity 80}
+                       {:id 5, :title "War and Peace", :popularity 75}))
+
 
 (fact "Test reading reminder generation"
       (create-reading-reminder) => {:book "1984", :reminder-time "Evening", :note "Read for an hour"})
@@ -72,6 +82,7 @@
                                                "secret" {:alg :hs512})}
         (login req-invalid-username) => {:message "Invalid login data please try again"}
         (login req-invalid-password) => {:message "Invalid login data please try again"}))
+
 
 
 
