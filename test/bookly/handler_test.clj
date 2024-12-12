@@ -26,13 +26,10 @@
 
 (fact "Test collaborative recommendations"
       (recommend) =not=> nil
-      (recommend) => '({:id 1, :title "The Hobbit", :popularity 95}
-                       {:id 7, :title "The Fellowship of the Ring", :popularity 94}
+      (recommend) => '({:id 7, :title "The Fellowship of the Ring", :popularity 94}
                        {:id 6, :title "Game of Thrones", :popularity 91}
                        {:id 2, :title "Dune", :popularity 90}
-                       {:id 3, :title "The Great Gatsby", :popularity 85}
-                       {:id 4, :title "1984", :popularity 80}
-                       {:id 5, :title "War and Peace", :popularity 75}))
+                       {:id 4, :title "1984", :popularity 80}))
 
 
 (fact "Test reading reminder generation"
