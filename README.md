@@ -2,7 +2,7 @@
 
 **Bookly** is an application developed as part of the **Master's course "Tools and Methods of Artificial Intelligence and Software Engineering"** at the **University of Belgrade, Faculty of Organizational Sciences**. Inspired by the intuitive and personalized user experience of Spotify, Bookly shifts its focus to the realm of books, offering platform for book discovery, management, and reading enhancement.
 
-## Let me explain why you might need Bookly 🤓
+## Let me explain why you might need Bookly 
 
 Picture this: you're staring at your bookshelf (or e-reader) wondering what to read next. Do you:
 
