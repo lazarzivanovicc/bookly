@@ -1,14 +1,15 @@
 (ns bookly.handler
   (:require
-   [bookly.resources :refer [db]]
    [bookly.http-helpers :refer :all]
+   [bookly.resources :refer [db]]
+   [buddy.auth :refer [authenticated?]]
    [buddy.hashers :as hashers]
    [buddy.sign.jwt :as jwt]
    [clj-time.core :as time]
+   [clojure.set :as set]
    [compojure.core :refer :all]
-   [next.jdbc :as jdbc]
-   [buddy.auth :refer [authenticated?]]
-   [dotenv :refer [env]]))
+   [dotenv :refer [env]]
+   [next.jdbc :as jdbc]))
 
 ;; Checking DB Connection
 (jdbc/execute! db ["select * from users"])
@@ -25,6 +26,12 @@
                    :first-name "Ana",
                    :last-name "Dimitric",
                    :username "AnaDimitricc",
+                   :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}
+                  "MarijaArsenijevicc"
+                  {:id 6
+                   :first-name "Marija"
+                   :last-name "Arsenijevic"
+                   :username "MarijaArsenijevicc"
                    :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}}))
 
 
@@ -43,7 +50,10 @@
                       {:user-id 5 :book-id 3}
                       {:user-id 5 :book-id 2}
                       {:user-id 5 :book-id 7}
-                      {:user-id 5 :book-id 6}]))
+                      {:user-id 5 :book-id 6}
+                      {:user-id 6 :book-id 1}
+                      {:user-id 6 :book-id 3}
+                      {:user-id 6 :book-id 5}]))
 
 
 (def secret (env "SECRET_KEY"))
@@ -201,4 +211,27 @@
     (sort-by :popularity > (remove #(contains? (set book-ids) (:id %)) @books))))
 
 
- 
+(defn jaccard-similarity
+  [set-a set-b]
+  (let [intersection (count (set/intersection set-a set-b))
+        union (count (clojure.set/union set-a set-b))]
+    (if (zero? union) 0 (/ intersection union))))
+
+
+;; TODO - I should throw an exception if there is no user with this ID
+(defn get-user-books
+  [user-id]
+  (set (map :book-id (filter #(= (:user-id %) user-id) @user-book))))
+
+
+;; TODO - Sort users by the similarity and filter out the ones that have similarity 0
+(defn similar-users
+  [user-id]
+  (let [user-books (get-user-books user-id)
+        users-rest (remove #(= user-id %) (distinct (map :user-id @user-book)))]
+    (map (fn [other-user-id]
+           {:user-id other-user-id
+            :similarity (jaccard-similarity user-books
+                                            (get-user-books other-user-id))}) users-rest)))
+
+;; TODO make recommend function return the diff between the books of selected user and users most similar to him

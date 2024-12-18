@@ -81,6 +81,25 @@
         (login req-invalid-password) => {:message "Invalid login data please try again"}))
 
 
+(fact "Test Jaccard Similarity"
+      (jaccard-similarity #{1 2 3} #{1 2 3}) =not=> nil
+      (jaccard-similarity #{1 2 3} #{5 6 7}) => 0
+      (jaccard-similarity #{1 2 3} #{1 2 3}) => 1
+      (jaccard-similarity #{1 2 3} #{1 2 5}) => 1/2
+      (jaccard-similarity #{1 2 3} #{1 2}) => 2/3
+      (jaccard-similarity #{1 2} #{1 2 3}) => 2/3)
+
+
+(fact "Test Get User's Books"
+      (get-user-books 1) =not=> nil
+      (get-user-books 1) => #{1 3 5}
+      (get-user-books 2) => #{})
+
+
+(fact "Find Similar Users"
+      (similar-users 1) =not=> nil
+      (similar-users 1) => '({:user-id 5, :similarity 1/3} {:user-id 6, :similarity 1}))
+
 
 
 
@@ -88,3 +107,6 @@
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
 ;; Possibly organize tests in groups (facts is used as a container for multiple fact statements), single simple test case should be represented with a fact
 ;; Do tests run immedietly when I start the ring server?
+
+;; CREATE TEST DB THAT I WILL CREATE SEED AND DESTORY
+;; CHECK MIDJE PROVIDED
