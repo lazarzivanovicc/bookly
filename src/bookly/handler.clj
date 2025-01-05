@@ -201,6 +201,19 @@
 ;; I will use https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest to get sentiment of each individual review
 ;; And I will have total_positive/total_negative/total_neutral by book 
 
+;; TODO SEND EACH REVIEW TO HUGGING FACE ENDPOINT
+;; COUNT THE NUMBER OF NEGATIVE, POSTIVE AND NEUTRAL REVIEWS 
+(defn get-review-sentiment
+  []
+  (let [reviews {"1984" [{:user "Anna" :rating 5 :review "Fantastic book!"}
+                         {:user "John" :rating 4 :review "Depressive!"}]}
+
+        review-sentiment (map (fn [[book revs]]
+                                {book (mapv (fn [r]
+                                              (assoc r :sentiment "POSITIVE"))
+                                            revs)}) reviews)]
+    (response-ok
+     {:review-sentiment review-sentiment})))
 ;; ----------------------------------------------------------------------------
 ;; 10. User Story - Notify Users About New Books by Their Favorite Author
 ;; ----------------------------------------------------------------------------
