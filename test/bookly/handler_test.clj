@@ -93,15 +93,20 @@
 (fact "Test Get User's Books"
       (get-user-books 1) =not=> nil
       (get-user-books 1) => #{1 3 5}
-      (get-user-books 2) => #{})
+      (get-user-books 2) => #{2})
 
 
 (fact "Find Similar Users"
       (similar-users 1) =not=> nil
-      (similar-users 1) => '({:user-id 5, :similarity 1/3} {:user-id 6, :similarity 1}))
+      (similar-users 1) => '({:user-id 6, :similarity 1} {:user-id 5, :similarity 1/3})
+      (similar-users 2) => '({:user-id 5, :similarity 1/5}))
 
 
-
+(fact "Test collaborative recommendations - new version"
+      (recommend-books 1) =not=> nil
+      (recommend-books 1) => '({:id 7, :title "The Fellowship of the Ring", :popularity 94}
+                               {:id 6, :title "Game of Thrones", :popularity 91}
+                               {:id 2, :title "Dune", :popularity 90}))
 
 ;; TODO
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
