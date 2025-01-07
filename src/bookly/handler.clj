@@ -1,6 +1,8 @@
 (ns bookly.handler
   (:require
    [bookly.http-helpers :refer :all]
+   [clj-http.client :as http]
+   [cheshire.core :as json]
    [bookly.resources :refer [db]]
    [buddy.auth :refer [authenticated?]]
    [buddy.hashers :as hashers]
@@ -13,6 +15,12 @@
 
 ;; Checking DB Connection
 (jdbc/execute! db ["select * from users"])
+
+(def huggingface-endpoint
+  "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest")
+
+
+(def huggingface-token (env "HF_TOKEN"))
 
 ;; ----------------------------------------------------------------------------
 ;; Registration & Login
@@ -66,6 +74,7 @@
 
 
 (def secret (env "SECRET_KEY"))
+
 
 ;; TODO - Use http helper functions
 ;; TODO - Try honeysql
@@ -198,11 +207,20 @@
 ;; ----------------------------------------------------------------------------
 ;; 9. User Story - User Wants to See Overall Sentiment of the Book Reviews
 ;; ----------------------------------------------------------------------------
-;; I will use https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest to get sentiment of each individual review
-;; And I will have total_positive/total_negative/total_neutral by book 
 
-;; TODO SEND EACH REVIEW TO HUGGING FACE ENDPOINT
-;; COUNT THE NUMBER OF NEGATIVE, POSTIVE AND NEUTRAL REVIEWS 
+(defn analyze-sentiment
+  [text]
+  (let [payload (json/encode {:inputs text})
+        response (http/post huggingface-endpoint
+                            {:headers {"Authorization" (str "Bearer " huggingface-token)
+                                       "Content-Type"  "application/json"}
+                             :body    payload
+                             :as      :json})
+        sentiment-vector (first (:body response))
+        sentiment (apply max-key :score sentiment-vector)]
+    sentiment))
+
+
 (defn get-review-sentiment
   []
   (let [reviews {"1984" [{:user "Anna" :rating 5 :review "Fantastic book!"}
@@ -210,7 +228,7 @@
 
         review-sentiment (map (fn [[book revs]]
                                 {book (mapv (fn [r]
-                                              (assoc r :sentiment "POSITIVE"))
+                                              (assoc r :sentiment (:label (analyze-sentiment (:review r)))))
                                             revs)}) reviews)]
     (response-ok
      {:review-sentiment review-sentiment})))

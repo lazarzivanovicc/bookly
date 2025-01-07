@@ -28,7 +28,7 @@
   (POST "/api/login" req (ring-response/response (login req)))
   (GET "/api/reading-list" req (ring-response/response (generate-reading-list req)))
   (GET "/api/collection-stats" [] (ring-response/response (collection-stats)))
-  (GET "/api/recommendations" [] (ring-response/response (recommend)))
+  (POST "/api/recommendations" req [] (ring-response/response (recommend-books req)))
   (GET "/api/recommendations-by-genre" [] (ring-response/response (recommend-by-genre)))
   (GET "/api/recommendations-by-author" [] (ring-response/response (recommend-by-author)))
   (GET "/api/create-reading-reminder" [] (ring-response/response (create-reading-reminder)))
