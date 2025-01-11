@@ -157,7 +157,6 @@
     {:genre selected-genre
      :books (genres selected-genre)}))
 
-
 ;; ----------------------------------------------------------------------------
 ;; 4. User Story - Get Book Recommendations by Favorite Author
 ;; ----------------------------------------------------------------------------
@@ -189,8 +188,14 @@
     (assoc reading-log :progress (double (* 100 (/ (:pages-read reading-log) (:total-pages reading-log)))))))
 
 ;; ----------------------------------------------------------------------------
-;; 7. User Story - Leave Personal Notes About a Book
+;; 7. User Story - Leave Personal Note About a Book
 ;; ----------------------------------------------------------------------------
+(defn leave-personal-notes
+  [book-id]
+  (let [selected-book (first (filter #(= (:id %) book-id) @books))
+        note "This book is a masterpiece."]
+    {:book (:title selected-book)
+     :note note}))
 
 ;; ----------------------------------------------------------------------------
 ;; 8. User Story - User wants to See Book Reviews
@@ -232,9 +237,18 @@
                                             revs)}) reviews)]
     (response-ok
      {:review-sentiment review-sentiment})))
+
 ;; ----------------------------------------------------------------------------
 ;; 10. User Story - Notify Users About New Books by Their Favorite Author
 ;; ----------------------------------------------------------------------------
+(defn notify-users-about-new-books []
+  (let [users {"LazarZivanovicc" {:favorite-author "J.K. Rowling"}
+               "DusanTrunicc" {:favorite-author "George Orwell"}}
+        new-books {"J.K. Rowling" ["Harry Potter and the Philosopher's Stone"
+                                   "Harry Potter and the Chamber of Secrets"]
+                   "George Orwell" ["1984" "Animal Farm"]}]
+    {:users users
+     :new-books new-books}))
 
 ;; ----------------------------------------------------------------------------
 ;; 11. User Story - User Subscribes to Someone's Book List - they will get the notification
@@ -250,12 +264,30 @@
       user)))
 
 ;; ----------------------------------------------------------------------------
-;; 13. User Story - User Spends his Streak to buy a Book
+;; 13. User Story - User Spends his Streak to unlock a Book
 ;; ----------------------------------------------------------------------------
+(defn spend-streak-to-unlock-book []
+  (let [user {:streak {:total 10 :claimed-today true}}
+        book {:id 1 :title "The Hobbit" :streak-cost 5}]
+    (if (>= (get-in user [:streak :total]) (:streak-cost book))
+      {:user (assoc-in user [:streak :total] (- (get-in user [:streak :total]) (:streak-cost book)))
+       :message "You have successfully unlocked the book"}
+      {:user user
+       :message "You don't have enough streak to unlock this book"})))
 
 ;; ----------------------------------------------------------------------------
 ;; 14. User Story - User Sets and Tracks Personal Reading Goals
 ;; ----------------------------------------------------------------------------
+(defn set-reading-goal
+  [user-id book-id target-date]
+  (let [user (first (filter #(= (:id %) user-id) @users))
+        book (first (filter #(= (:id %) book-id) @books))
+        current-goals (get-in user [:reading-goals] [])
+        new-goal {:book book
+                  :target-date target-date
+                  :status "in-progress"
+                  :created-at (java.util.Date.)}]
+    {:user (assoc user :reading-goals (conj current-goals new-goal))}))
 
 ;; ----------------------------------------------------------------------------
 ;; 15. User Story - User Receives Notifications for Book Deals

@@ -109,6 +109,33 @@
                                   '({"1984"
                                      [{:user "Anna", :rating 5, :review "Fantastic book!", :sentiment "positive"}
                                       {:user "John", :rating 4, :review "Depressive!", :sentiment "negative"}]})}})
+
+
+(fact "Test notify users about new books"
+      (notify-users-about-new-books) =not=> nil
+      (notify-users-about-new-books) => {:users {"LazarZivanovicc" {:favorite-author "J.K. Rowling"}
+                                                 "DusanTrunicc" {:favorite-author "George Orwell"}}
+                                         :new-books {"J.K. Rowling" ["Harry Potter and the Philosopher's Stone"
+                                                                     "Harry Potter and the Chamber of Secrets"]
+                                                     "George Orwell" ["1984" "Animal Farm"]}})
+
+
+(fact "Test leave personal notes"
+      (leave-personal-notes 1) =not=> nil
+      (leave-personal-notes 1) => {:book "The Hobbit", :note "This book is a masterpiece."})
+
+
+(fact "Test spend streak to unlock book"
+      (spend-streak-to-unlock-book) =not=> nil
+      (spend-streak-to-unlock-book) => {:user {:streak {:total 5, :claimed-today true}}, :message "You have successfully unlocked the book"})
+
+
+(fact "Test set reading goal"
+      (set-reading-goal 1 1 "2025-01-15") =not=> nil
+      (set-reading-goal 1 1 "2025-01-15") => {:user {:reading-goals [{:book {:id 1, :title "The Hobbit", :popularity 95},
+                                                                      :target-date "2025-01-15",
+                                                                      :status "in-progress",
+                                                                      :created-at (java.util.Date.)}]}})
 ;; TODO
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
 ;; Possibly organize tests in groups (facts is used as a container for multiple fact statements), single simple test case should be represented with a fact
