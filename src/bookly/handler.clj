@@ -23,58 +23,191 @@
 (def huggingface-token (env "HF_TOKEN"))
 
 ;; ----------------------------------------------------------------------------
-;; Registration & Login
+;; Data
 ;; ----------------------------------------------------------------------------
-(def users (atom {"LazarZivanovicc"
-                  {:id 1
-                   :first-name "Lazar",
-                   :last-name "Zivanovic",
-                   :username "LazarZivanovicc",
-                   :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}
-                  "DusanTrunicc"
+(def users (atom {"LazarZivanovicc" {:id 1
+                                     :first-name "Lazar"
+                                     :last-name "Zivanovic"
+                                     :username "LazarZivanovicc"
+                                     :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
+                                     :created-at (java.util.Date.)
+                                     :updated-at (java.util.Date.)
+                                     :favorite-author "J.K. Rowling"
+                                     :streak {:total 10 :claimed-today false}
+                                     :reading-goals []}
+                  "DusanTrunicc" {:id 2
+                                  :first-name "Dusan",
+                                  :last-name "Trunic",
+                                  :username "DusanTrunicc",
+                                  :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
+                                  :created-at (java.util.Date.)
+                                  :updated-at (java.util.Date.)
+                                  :favorite-author "George Orwell"
+                                  :streak {:total 10 :claimed-today false}
+                                  :reading-goals []}
+                  "AnaDimitricc" {:id 5
+                                  :first-name "Ana",
+                                  :last-name "Dimitric",
+                                  :username "AnaDimitricc",
+                                  :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
+                                  :created-at (java.util.Date.)
+                                  :updated-at (java.util.Date.)
+                                  :favorite-author "George Orwell"
+                                  :streak {:total 10 :claimed-today false}
+                                  :reading-goals []}
+                  "MarijaArsenijevicc" {:id 6
+                                        :first-name "Marija"
+                                        :last-name "Arsenijevic"
+                                        :username "MarijaArsenijevicc"
+                                        :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
+                                        :created-at (java.util.Date.)
+                                        :updated-at (java.util.Date.)
+                                        :favorite-author "J.K. Rowling"
+                                        :streak {:total 10 :claimed-today false}
+                                        :reading-goals []}}))
+
+
+(def books (atom [{:id 1
+                   :title "The Hobbit"
+                   :popularity 95
+                   :pages 310
+                   :genres ["Fantasy"]
+                   :streak-cost 5
+                   :author "J.R.R. Tolkien"}
                   {:id 2
-                   :first-name "Dusan",
-                   :last-name "Trunic",
-                   :username "DusanTrunicc",
-                   :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}
-                  "AnaDimitricc"
+                   :title "Dune"
+                   :popularity 90
+                   :pages 412
+                   :genres ["Fantasy"]
+                   :streak-cost 5
+                   :author "Frank Herbert"}
+                  {:id 3
+                   :title "The Great Gatsby"
+                   :popularity 85
+                   :pages 180
+                   :genres ["Fiction"]
+                   :streak-cost 3
+                   :author "F. Scott Fitzgerald"}
+                  {:id 4
+                   :title "1984"
+                   :popularity 80
+                   :pages 328
+                   :genres ["Dystopian"]
+                   :streak-cost 4
+                   :author "George Orwell"}
                   {:id 5
-                   :first-name "Ana",
-                   :last-name "Dimitric",
-                   :username "AnaDimitricc",
-                   :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}
-                  "MarijaArsenijevicc"
-                  {:id 6
-                   :first-name "Marija"
-                   :last-name "Arsenijevic"
-                   :username "MarijaArsenijevicc"
-                   :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"}}))
+                   :title "War and Peace"
+                   :popularity 75
+                   :pages 1225
+                   :genres ["Historical Fiction"]
+                   :streak-cost 6
+                   :author "Leo Tolstoy"}]))
 
+(def collections (atom [{:id 1
+                         :user-id 1
+                         :name "Fantasy Favorites"
+                         :description "My favorite fantasy books"
+                         :public true
+                         :created-at (java.util.Date.)
+                         :updated-at (java.util.Date.)}
+                        {:id 2
+                         :user-id 1
+                         :name "To Read in 2025"
+                         :description "Reading list for next year"
+                         :public false
+                         :created-at (java.util.Date.)
+                         :updated-at (java.util.Date.)}]))
 
-(def books (atom [{:id 1 :title "The Hobbit" :popularity 95}
-                  {:id 2 :title "Dune" :popularity 90}
-                  {:id 3 :title "The Great Gatsby" :popularity 85}
-                  {:id 4 :title "1984" :popularity 80}
-                  {:id 5 :title "War and Peace" :popularity 75}
-                  {:id 6 :title "Game of Thrones" :popularity 91}
-                  {:id 7 :title "The Fellowship of the Ring" :popularity 94}]))
-
-(def user-book (atom [{:user-id 1 :book-id 1}
-                      {:user-id 1 :book-id 3}
-                      {:user-id 1 :book-id 5}
-                      {:user-id 5 :book-id 1}
-                      {:user-id 5 :book-id 3}
-                      {:user-id 5 :book-id 2}
-                      {:user-id 5 :book-id 7}
-                      {:user-id 5 :book-id 6}
-                      {:user-id 6 :book-id 1}
-                      {:user-id 6 :book-id 3}
-                      {:user-id 6 :book-id 5}
-                      {:user-id 2 :book-id 2}]))
+(def user-book (atom [{:user-id 1
+                       :book-id 1
+                       :collection-id 1
+                       :status "reading"
+                       :progress 164
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 1
+                       :book-id 3
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 1
+                       :book-id 5
+                       :collection-id 2
+                       :status "reading"
+                       :progress 164
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 5
+                       :book-id 1
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 5
+                       :book-id 3
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 5
+                       :book-id 2
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 5
+                       :book-id 7
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 5
+                       :book-id 6
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 6
+                       :book-id 1
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 6
+                       :book-id 3
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 6
+                       :book-id 5
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}
+                      {:user-id 2
+                       :book-id 2
+                       :collection-id nil
+                       :status "want-to-read"
+                       :progress nil
+                       :added-at (java.util.Date.)
+                       :updated-at (java.util.Date.)}]))
 
 
 (def secret (env "SECRET_KEY"))
-
+;; ----------------------------------------------------------------------------
+;; Registration & Login
+;; ----------------------------------------------------------------------------
 
 ;; TODO - Use http helper functions
 ;; TODO - Try honeysql
@@ -87,7 +220,8 @@
   (let [first-name (get-in request [:body "first-name"])
         last-name (get-in request [:body "last-name"])
         username (get-in request [:body "username"])
-        password (get-in request [:body "password"])]
+        password (get-in request [:body "password"])
+        favorite-author (get-in request [:body "favorite-author"])]
     (if (contains? @users username)
       {:message (str "User " username " already exists")}
       (do
@@ -95,8 +229,9 @@
                                      :last-name last-name
                                      :username username
                                      :password (hashers/derive password)
-                                     :created-at (time/now)
-                                     :updated-at (time/now)})
+                                     :created-at (java.util.Date.)
+                                     :updated-at (java.util.Date.)
+                                     :favorite-author favorite-author})
         {:message (str "User " username " created successfully")}))))
 
 
@@ -107,7 +242,7 @@
     (if (contains? @users username)
       (if (:valid (hashers/verify password (:password (get @users username))))
         (let [claims {:username username
-                      :exp (time/plus (time/now) (time/seconds 86400))}
+                      :exp (time/plus (java.util.Date.) (time/seconds 86400))}
               token  (jwt/sign claims secret {:alg :hs512})]
           {:message (str username " logged-in successfully") :token token})
         {:message "Invalid login data please try again"})
@@ -290,12 +425,7 @@
     {:user (assoc user :reading-goals (conj current-goals new-goal))}))
 
 ;; ----------------------------------------------------------------------------
-;; 15. User Story - User Receives Notifications for Book Deals
-;; ----------------------------------------------------------------------------
-;; I as a User, I want to receive notifications about discounts or deals on books in my wish list or by my favorite authors.
-
-;; ----------------------------------------------------------------------------
-;; 16. User Story - User Gets Recommendation from Users that have similar interest like him (Collaborative Filtering)
+;; 15. User Story - User Gets Recommendation from Users that have similar interest like him (Collaborative Filtering)
 ;; ----------------------------------------------------------------------------
 ;; Currently I return the most popular books that user has not read yet
 
@@ -335,4 +465,66 @@
         similar-users-ids (map :user-id (similar-users user-id))
         recommended-books (remove #(contains? user-books %) (mapcat get-user-books similar-users-ids))]
     (sort-by :popularity > (filter #(contains? (set recommended-books) (:id %)) @books))))
+
+;; ----------------------------------------------------------------------------
+;; REST
+;; ----------------------------------------------------------------------------
+
+(defn create-collection
+  [req]
+  (if (authenticated? req)
+    (let [user-id (get-in req [:identity :username])
+          name (get-in req [:body "name"])
+          description (get-in req [:body "description"])
+          public (get-in req [:body "public"])
+          collection-id (inc (count @collections))
+          new-collection {:id collection-id
+                          :user-id user-id
+                          :name name
+                          :description description
+                          :public public
+                          :created-at (java.util.Date.)
+                          :updated-at (java.util.Date.)}]
+      (swap! collections conj new-collection)
+      (response-ok {:message "Collection created successfully"
+                    :collection new-collection}))
+    (response-unauthorized "Unauthorized")))
+
+
+(defn add-book-to-collection
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          user-id (:id (get @users username))
+          book-id (get-in req [:body "book-id"])
+          collection-id (get-in req [:body "collection-id"])
+          collection (first (filter #(and (= (:id %) collection-id)
+                                          (= (:user-id %) user-id))
+                                    @collections))
+          book-exists-in-collection? (some #(and (= (:book-id %) book-id)
+                                                 (= (:collection-id %) collection-id))
+                                           @user-book)]
+      (if collection
+        (if (not book-exists-in-collection?)
+          (let [new-user-book {:user-id user-id
+                               :book-id book-id
+                               :collection-id collection-id
+                               :status "want-to-read"
+                               :progress nil
+                               :added-at (java.util.Date.)
+                               :updated-at (java.util.Date.)}]
+            (swap! user-book conj new-user-book)
+            (response-ok {:message "Book added to collection successfully"
+                          :user-book new-user-book}))
+          (throw (ex-info "Book already exists in the collection"
+                          {:type :book-already-exists
+                           :user-id user-id
+                           :collection-id collection-id
+                           :book-id book-id})))
+        (throw (ex-info "Collection not found or user not owner of a collection"
+                        {:type :collection-not-found
+                         :user-id user-id
+                         :collection-id collection-id
+                         :book-id book-id}))))
+    (response-unauthorized "Unauthorized")))
 

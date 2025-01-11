@@ -35,6 +35,8 @@
   (GET "/api/track-reading-progress" [] (ring-response/response (track-reading-progress)))
   (GET "/api/extend-user-streak" [] (ring-response/response (extend-user-streak)))
   (GET "/api/get-book-reviews" [] (ring-response/response (get-book-reviews)))
+  (POST "/api/collections" req (ring-response/response (create-collection req)))
+  (POST "/api/collections/add-book" req (ring-response/response (add-book-to-collection req)))
   (route/not-found "Not Found"))
 
 

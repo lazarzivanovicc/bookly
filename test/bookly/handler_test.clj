@@ -45,11 +45,13 @@
       (let [req-new-user {:body {"username" "JovanZivanovicc"
                                  "first-name" "Jovan"
                                  "last-name" "Zivanovic"
-                                 "password" "fakepass"}}
+                                 "password" "fakepass"
+                                 "favorite-author" "George Orwell"}}
             req-existing-user {:body {"username" "LazarZivanovicc"
                                       "first-name" "Lazar"
                                       "last-name" "Zivanovic"
-                                      "password" "fakepass1"}}]
+                                      "password" "fakepass1"
+                                      "favorite-author" "George Orwell"}}]
         (register req-new-user) =not=> nil
         (register req-existing-user) =not=> nil
         (register req-existing-user) =>  {:message (str "User "
@@ -68,7 +70,7 @@
         (login req-valid) => {:message (str (get-in req-valid [:body "username"])
                                             " logged-in successfully")
                               :token (jwt/sign {:username (get-in req-valid [:body "username"])
-                                                :exp (time/plus (time/now) (time/seconds 86400))}
+                                                :exp (time/plus (java.util.Date.) (time/seconds 86400))}
                                                "secret" {:alg :hs512})}
         (login req-invalid-username) => {:message "Invalid login data please try again"}
         (login req-invalid-password) => {:message "Invalid login data please try again"}))
@@ -136,6 +138,45 @@
                                                                       :target-date "2025-01-15",
                                                                       :status "in-progress",
                                                                       :created-at (java.util.Date.)}]}})
+
+
+(fact "Test create collection"
+      (create-collection {:identity {:username "LazarZivanovicc"}
+                          :body {"name" "Summer Reading 1"
+                                 "description" "Books for summer 2025"
+                                 "public" true}}) =not=> nil
+      (create-collection {:identity {:username "LazarZivanovicc"}
+                          :body {"name" "Summer Reading 2"
+                                 "description" "Books for summer 2025"
+                                 "public" true}}) => {:body {:message "Collection created successfully"
+                                                             :collection {:id 4,
+                                                                          :user-id "LazarZivanovicc",
+                                                                          :name "Summer Reading 2",
+                                                                          :description "Books for summer 2025",
+                                                                          :public true,
+                                                                          :created-at (java.util.Date.),
+                                                                          :updated-at (java.util.Date.)}}
+                                                      :status 200})
+
+
+(fact "Test add book to collection"
+      (add-book-to-collection {:identity {:username "LazarZivanovicc"}
+                               :body {"user-id" 1
+                                      "book-id" 3
+                                      "collection-id" 1}}) =not=> nil
+      (add-book-to-collection {:identity {:username "LazarZivanovicc"}
+                               :body {"user-id" 1
+                                      "book-id" 1
+                                      "collection-id" 2}}) => {:body {:message "Book added to collection successfully"
+                                                                      :user-book {:user-id 1,
+                                                                                  :book-id 1,
+                                                                                  :collection-id 2,
+                                                                                  :status "want-to-read",
+                                                                                  :progress nil,
+                                                                                  :added-at (java.util.Date.),
+                                                                                  :updated-at (java.util.Date.)}}
+                                                               :status 200})
+
 ;; TODO
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
 ;; Possibly organize tests in groups (facts is used as a container for multiple fact statements), single simple test case should be represented with a fact
