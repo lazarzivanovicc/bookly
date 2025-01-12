@@ -118,6 +118,9 @@
                          :created-at (java.util.Date.)
                          :updated-at (java.util.Date.)}]))
 
+(def subscribers (atom [{:collection-id 1
+                         :user-id 2}]))
+
 (def user-book (atom [{:user-id 1
                        :book-id 1
                        :collection-id 1
@@ -388,6 +391,17 @@
 ;; ----------------------------------------------------------------------------
 ;; 11. User Story - User Subscribes to Someone's Book List - they will get the notification
 ;; ----------------------------------------------------------------------------
+(defn subscribe-to-collection
+  [username collection-id]
+  (let [user-id (:id (get @users username))
+        new-subscription {:collection-id collection-id :user-id user-id}
+        existing-subscription (first (filter #(and (= user-id (:user-id %))
+                                                   (= collection-id (:collection-id %)))
+                                             @subscribers))]
+    (if existing-subscription
+      (throw (ex-info "User already subscribed to the collection"
+                      {:type :user-already-subscribed}))
+      (swap! subscribers conj new-subscription))))
 
 ;; ----------------------------------------------------------------------------
 ;; 12. User Story - User Extends his/her Reading Streak by checking-in for a Reading Session  
@@ -473,7 +487,8 @@
 (defn create-collection
   [req]
   (if (authenticated? req)
-    (let [user-id (get-in req [:identity :username])
+    (let [username (get-in req [:identity :username])
+          user-id (:id (get @users username))
           name (get-in req [:body "name"])
           description (get-in req [:body "description"])
           public (get-in req [:body "public"])

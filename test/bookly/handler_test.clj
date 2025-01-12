@@ -150,7 +150,7 @@
                                  "description" "Books for summer 2025"
                                  "public" true}}) => {:body {:message "Collection created successfully"
                                                              :collection {:id 4,
-                                                                          :user-id "LazarZivanovicc",
+                                                                          :user-id 1,
                                                                           :name "Summer Reading 2",
                                                                           :description "Books for summer 2025",
                                                                           :public true,
@@ -176,6 +176,11 @@
                                                                                   :added-at (java.util.Date.),
                                                                                   :updated-at (java.util.Date.)}}
                                                                :status 200})
+
+
+(fact "Test subscribe to collection"
+      (subscribe-to-collection "LazarZivanovicc" 1) =not=> nil
+      (subscribe-to-collection "MarijaArsenijevicc" 1) => [{:collection-id 1, :user-id 2} {:collection-id 1, :user-id 1} {:collection-id 1, :user-id 6}])
 
 ;; TODO
 ;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
