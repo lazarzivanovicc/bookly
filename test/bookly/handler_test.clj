@@ -14,11 +14,41 @@
 
 
 (fact "Test fetching of collection stats"
-      (collection-stats) => {:total-books 5, :total-pages 2455, :average-pages 491, :genres #{"Fantasy" "Sci-Fi"}})
+      (collection-stats {:identity {:username "LazarZivanovicc"} :body {"collection-id" 1}}) =not=> nil
+      (collection-stats {:identity {:username "LazarZivanovicc"} :body {"collection-id" 1}}) => {:status 200,
+                                                                                                 :body
+                                                                                                 {:user-id 1,
+                                                                                                  :books
+                                                                                                  '({:id 1,
+                                                                                                     :title "The Hobbit",
+                                                                                                     :popularity 95,
+                                                                                                     :pages 310,
+                                                                                                     :genres ["Fantasy"],
+                                                                                                     :streak-cost 5,
+                                                                                                     :author "J.R.R. Tolkien"}),
+                                                                                                  :total-books 1,
+                                                                                                  :total-pages 310,
+                                                                                                  :average-pages 310,
+                                                                                                  :genres #{"Fantasy"}}})
 
 
 (fact "Test recommendations by genre"
-      (recommend-by-genre) =not=> nil)
+      (recommend-by-genre {:identity {:username "LazarZivanovicc"} :body {"genre" "Fantasy"}}) =not=> nil
+      (recommend-by-genre {:identity {:username "LazarZivanovicc"} :body {"genre" "Fantasy"}}) => {:status 200
+                                                                                                   :body {:genre "Fantasy"
+                                                                                                          :books [{:id 1
+                                                                                                                   :title "The Hobbit"
+                                                                                                                   :author "J.R.R. Tolkien"
+                                                                                                                   :popularity 95}
+                                                                                                                  {:id 2
+                                                                                                                   :title "Dune"
+                                                                                                                   :author "Frank Herbert"
+                                                                                                                   :popularity 90}]}}
+
+
+      (recommend-by-genre {:identity {:username "LazarZivanovicc"} :body {"genre" "Mystery"}}) => {:status 200
+                                                                                                   :body {:genre "Mystery"
+                                                                                                          :books []}})
 
 
 (fact "Test recommendations by user's preferred author"
