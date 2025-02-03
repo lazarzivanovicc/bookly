@@ -52,15 +52,30 @@
 
 
 (fact "Test recommendations by user's preferred author"
-      (recommend-by-author) => {:author "George Orwell", :books ["1984" "Animal Farm"]})
+      (recommend-by-author {:identity {:username "LazarZivanovicc"} :body {}}) =not=> nil
+      (recommend-by-author {:identity {:username "LazarZivanovicc"} :body {}}) => {:status 200
+                                                                                   :body {:author "J.K. Rowling" :books ()}})
 
 
 (fact "Test reading reminder generation"
-      (create-reading-reminder) => {:book "1984", :reminder-time "Evening", :note "Read for an hour"})
+      (create-reading-reminder {:identity {:username "LazarZivanovicc"}
+                                :body {"book-id" 1
+                                       "reminder-time" "Evening"
+                                       "note" "Read for an hour"}}) =not=> nil
+      (create-reading-reminder {:identity {:username "LazarZivanovicc"}
+                                :body {"book-id" 1
+                                       "reminder-time" "Evening"
+                                       "note" "Read for an hour"}}) => {:status 200
+                                                                        :body {:user-id 1
+                                                                               :book-id 1
+                                                                               :reminder-time "Evening"
+                                                                               :note "Read for an hour"
+                                                                               :pages-left 146}})
 
 
 (fact "Test reading progress tracker"
-      (track-reading-progress) => {:book "1984", :total-pages 328, :pages-read 164, :progress 50.0})
+      (track-reading-progress {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) =not=> nil
+      (track-reading-progress {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) => {:status 200, :body {:book "The Hobbit", :total-pages 310, :pages-read 164, :progress 52.90322580645161, :pages-left 146}})
 
 
 (fact "Test streak extension"
@@ -153,8 +168,8 @@
 
 
 (fact "Test leave personal notes"
-      (leave-personal-notes 1) =not=> nil
-      (leave-personal-notes 1) => {:book "The Hobbit", :note "This book is a masterpiece."})
+      (leave-personal-note {:identity {:username "LazarZivanovicc"} :body {"book-id" 2 "note" "This book is a great read."}}) =not=> nil
+      (leave-personal-note {:identity {:username "LazarZivanovicc"} :body {"book-id" 1 "note" "This book is a great read."}}) => {:status 200, :body {:message "Note added successfully", :note-id 3, :note "This book is a great read."}})
 
 
 (fact "Test spend streak to unlock book"

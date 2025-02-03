@@ -206,6 +206,11 @@
                        :added-at (java.util.Date.)
                        :updated-at (java.util.Date.)}]))
 
+(def notes (atom [{:id 1
+                   :user-id 1
+                   :book-id 1
+                   :note "This book is a masterpiece."}]))
+
 
 (def secret (env "SECRET_KEY"))
 ;; ----------------------------------------------------------------------------
@@ -306,46 +311,95 @@
         :books (map #(select-keys % [:id :title :author :popularity]) sorted-books)}))
     (response-unauthorized "Unauthorized")))
 
-
 ;; ----------------------------------------------------------------------------
 ;; 4. User Story - Get Book Recommendations by Favorite Author
 ;; ----------------------------------------------------------------------------
-(defn recommend-by-author []
-  (let [user {:preferred-author "George Orwell"}
-        authors {"J.K. Rowling" ["Harry Potter and the Philosopher's Stone"
-                                 "Harry Potter and the Chamber of Secrets"]
-                 "George Orwell" ["1984" "Animal Farm"]}
-        selected-author (first (filter #(= (:preferred-author user) %) (keys authors)))]
-    {:author selected-author
-     :books (authors selected-author)}))
+(defn recommend-by-author
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          favorite-author (:favorite-author (get @users username))
+          matching-books (filter #(= (:author %) favorite-author) @books)
+          sorted-books (sort-by :popularity > matching-books)]
+      (response-ok
+       {:author favorite-author
+        :books (map #(select-keys % [:id :title :popularity]) sorted-books)}))
+    (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
 ;; 5. User Story - User Generates Reading Reminder
 ;; ----------------------------------------------------------------------------
-(defn create-reading-reminder []
-  (let [books ["1984" "Dune" "The Great Gatsby" "The Hobbit"]
-        times ["Morning" "Evening"]
-        notes ["Read for 30 minutes", "Read for an hour"]]
-    {:book (first books)
-     :reminder-time (second times)
-     :note (second notes)}))
+(defn create-reading-reminder
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          user-id (:id (get @users username))
+          book-id (get-in req [:body "book-id"])
+          reminder-time (get-in req [:body "reminder-time"])
+          note (get-in req [:body "note"])
+          user-reading-book (first (filter #(and (= (:user-id %) user-id)
+                                                 (= (:book-id %) book-id)
+                                                 (= (:status %) "reading"))
+                                           @user-book))
+          book (first (filter #(= (:id %) book-id) @books))]
+      (if (and user-reading-book book)
+        (response-ok
+         {:user-id user-id
+          :book-id book-id
+          :reminder-time reminder-time
+          :note note
+          :pages-left (- (:pages book) (:progress user-reading-book))})
+        (throw (ex-info "Book not found or not currently reading"
+                        {:type :book-not-found-or-not-currently-reading}))))
+    (response-unauthorized "Unauthorized")))
+
+;; Create reading reminder atom
 
 ;; ----------------------------------------------------------------------------
 ;; 6. User Story - Track Reading Progress of a User
-;; ---------------------------------------------------------------------------- 
-(defn track-reading-progress []
-  (let [reading-log {:book "1984" :total-pages 328 :pages-read 164}]
-    (assoc reading-log :progress (double (* 100 (/ (:pages-read reading-log) (:total-pages reading-log)))))))
+;; ----------------------------------------------------------------------------
+(defn track-reading-progress
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          user-id (:id (get @users username))
+          book-id (get-in req [:body "book-id"])
+          user-reading-book (first (filter #(and (= (:user-id %) user-id)
+                                                 (= (:book-id %) book-id)
+                                                 (= (:status %) "reading"))
+                                           @user-book))
+          book (first (filter #(= (:id %) book-id) @books))]
+      (if (and user-reading-book book)
+        (response-ok
+         {:book (:title book)
+          :total-pages (:pages book)
+          :pages-read (:progress user-reading-book)
+          :progress (double (* 100 (/ (:progress user-reading-book) (:pages book))))
+          :pages-left (- (:pages book) (:progress user-reading-book))})
+        (throw (ex-info "Book not found or not currently reading"
+                        {:type :book-not-found-or-not-currently-reading}))))
+    (response-unauthorized "Unauthorized")))
+
+(track-reading-progress {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}})
 
 ;; ----------------------------------------------------------------------------
 ;; 7. User Story - Leave Personal Note About a Book
 ;; ----------------------------------------------------------------------------
-(defn leave-personal-notes
-  [book-id]
-  (let [selected-book (first (filter #(= (:id %) book-id) @books))
-        note "This book is a masterpiece."]
-    {:book (:title selected-book)
-     :note note}))
+(defn leave-personal-note [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          user-id (:id (get @users username))
+          book-id (get-in req [:body "book-id"])
+          note (get-in req [:body "note"])
+          note-id (inc (count @notes))]
+      (swap! notes conj {:id note-id
+                         :user-id user-id
+                         :book-id book-id
+                         :note note})
+      (response-ok {:message "Note added successfully"
+                    :note-id note-id
+                    :note note}))
+    (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
 ;; 8. User Story - User wants to See Book Reviews
