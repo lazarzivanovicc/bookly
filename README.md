@@ -76,6 +76,20 @@ You will need [Leiningen][] 2.0.0 or above installed.
 
 ## Running
 
+Create Python virtual environment in the root folder
+
+    python -m venv .venv - Windows
+    python3 -m venv .venv - Mac/Linux
+
+Activate the virtual environment
+
+    .venv\Scripts\activate - Windows
+    source .venv/bin/activate - Mac/Linux
+
+Install the requirements
+
+    pip install -r requirements.txt
+
 To start a web server for the application, run:
 
     lein ring server

@@ -11,10 +11,11 @@
    [clojure.set :as set]
    [compojure.core :refer :all]
    [dotenv :refer [env]]
-   [next.jdbc :as jdbc]))
+   [next.jdbc :as jdbc]
+   [clojure.java.shell :refer [sh]]))
 
 ;; Checking DB Connection
-(jdbc/execute! db ["select * from users"])
+;; (jdbc/execute! db ["select * from users"])
 
 (def huggingface-endpoint
   "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest")
@@ -22,6 +23,39 @@
 
 (def huggingface-token (env "HF_TOKEN"))
 
+(defn get-embedding
+  [text]
+  (let [{:keys [exit out err]} (sh ".venv/Scripts/python.exe" "src/bookly/utils/embeddings.py" text)]
+    (if (zero? exit)
+      (vec (json/parse-string out))
+      (throw (ex-info "Python script failed" {:error err})))))
+
+
+(defn dot
+  [v1 v2]
+  (if (not= (count v1) (count v2))
+    (throw (ex-info "Vectors must have the same number of elements" {}))
+    (reduce + 0 (map * v1 v2))))
+
+
+(defn euclidian-norm
+  [v]
+  (Math/sqrt (reduce + (map * v v))))
+
+
+(defn cosine-similarity
+  [v1 v2]
+  (let [dot-prod (dot v1 v2)
+        norm-v1  (euclidian-norm v1)
+        norm-v2  (euclidian-norm v2)]
+    (cond
+      (zero? norm-v1) (throw (ex-info "First vector has zero norm" {:vector :v1}))
+      (zero? norm-v2) (throw (ex-info "Second vector has zero norm" {:vector :v2}))
+      :else (Double/parseDouble (format "%.2f" (/ dot-prod (* norm-v1 norm-v2)))))))
+
+
+(cosine-similarity (get-embedding "Lord of the Rings - Two Towers") (get-embedding "Lord of the Rings - Two Fellowship of the Ring"))
+(cosine-similarity [0 0] [1 1])
 ;; ----------------------------------------------------------------------------
 ;; Data
 ;; ----------------------------------------------------------------------------
