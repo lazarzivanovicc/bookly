@@ -83,7 +83,8 @@
 
 
 (fact "Test Book Review fetch"
-      (get-book-reviews) =not=> nil)
+      (get-book-reviews {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) =not=> nil
+      (get-book-reviews {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) => {:status 200, :body {:reviews [{:id 1, :user-id 1, :book-id 1, :rating 5, :review "Fantastic book!", :created-at #inst "2025-02-04T20:00:52.996-00:00", :updated-at #inst "2025-02-04T20:00:52.996-00:00"} {:id 2, :user-id 2, :book-id 1, :rating 4, :review "Masterpiece", :created-at #inst "2025-02-04T20:00:52.996-00:00", :updated-at #inst "2025-02-04T20:00:52.996-00:00"}]}})
 
 
 (fact "Registration test"
@@ -144,9 +145,7 @@
 
 (fact "Test collaborative recommendations - new version"
       (recommend-books 1) =not=> nil
-      (recommend-books 1) => '({:id 7, :title "The Fellowship of the Ring", :popularity 94}
-                               {:id 6, :title "Game of Thrones", :popularity 91}
-                               {:id 2, :title "Dune", :popularity 90}))
+      (recommend-books 1) => '({:id 2, :title "Dune", :popularity 90, :pages 412, :genres ["Fantasy"], :streak-cost 5, :author "Frank Herbert"}))
 
 (fact "Test get review sentiment function"
       (get-review-sentiment) =not=> nil

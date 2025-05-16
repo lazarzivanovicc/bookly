@@ -212,6 +212,22 @@
                    :note "This book is a masterpiece."}]))
 
 
+(def reviews (atom [{:id 1
+                     :user-id 1
+                     :book-id 1
+                     :rating 5
+                     :review "Fantastic book!"
+                     :created-at (java.util.Date.)
+                     :updated-at (java.util.Date.)}
+                    {:id 2
+                     :user-id 2
+                     :book-id 1
+                     :rating 4
+                     :review "Masterpiece"
+                     :created-at (java.util.Date.)
+                     :updated-at (java.util.Date.)}]))
+
+
 (def secret (env "SECRET_KEY"))
 ;; ----------------------------------------------------------------------------
 ;; Registration & Login
@@ -404,14 +420,21 @@
 ;; ----------------------------------------------------------------------------
 ;; 8. User Story - User wants to See Book Reviews
 ;; ----------------------------------------------------------------------------
-(defn get-book-reviews []
-  (let [reviews {"1984" [{:user "Anna" :rating 5 :review "Fantastic book!"}
-                         {:user "John" :rating 4 :review "Depresive!"}]
-                 "The Hobbit" [{:user "Steve" :rating 5 :review "Pure magic!"}
-                               {:user "Nicolas" :rating 4 :review "Great but little bit too slow."}]}
-        selected-book (rand-nth (keys reviews))]
-    {:book selected-book
-     :reviews (reviews selected-book)}))
+(defn get-book-reviews
+  [req]
+  (if (authenticated? req)
+    (let [book-id (get-in req [:body "book-id"])
+          book (first (filter #(= (:id %) book-id) @books))
+          book-reviews (filter #(= (:book-id %) book-id) @reviews)]
+      (if book
+        (response-ok
+         {:reviews book-reviews})
+        (throw (ex-info "Book not found"
+                        {:type :book-not-found
+                         :book-id book-id}))))
+    (response-unauthorized "Unauthorized")))
+
+(get-book-reviews {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}})
 
 ;; ----------------------------------------------------------------------------
 ;; 9. User Story - User Wants to See Overall Sentiment of the Book Reviews
@@ -541,8 +564,9 @@
 
 (defn recommend-books
   [user-id]
-  (let [user-books (get-user-books user-id)
-        similar-users-ids (map :user-id (similar-users user-id))
+  (let [n-nearest-neighbours 10
+        user-books (get-user-books user-id)
+        similar-users-ids (take n-nearest-neighbours (map :user-id (similar-users user-id)))
         recommended-books (remove #(contains? user-books %) (mapcat get-user-books similar-users-ids))]
     (sort-by :popularity > (filter #(contains? (set recommended-books) (:id %)) @books))))
 
