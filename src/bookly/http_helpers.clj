@@ -27,3 +27,17 @@
   [error-message]
   {:status 403
    :body {:error error-message}})
+
+
+(defn response-server-error
+  "Returns a 500 Error response with an error message."
+  [error-message]
+  {:status 500
+   :body {:error error-message}})
+
+
+(defn response-error
+  "Returns a Error response with assigned status and error message."
+  [status error-message]
+  {:status status
+   :body {:error error-message}})

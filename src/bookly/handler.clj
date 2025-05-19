@@ -12,267 +12,24 @@
    [compojure.core :refer :all]
    [dotenv :refer [env]]
    [next.jdbc :as jdbc]
-   [clojure.java.shell :refer [sh]]))
+   [clojure.java.shell :refer [sh]]
+   [bookly.data :refer :all]))
 
 ;; Checking DB Connection
 ;; (jdbc/execute! db ["select * from users"])
 
 (def huggingface-endpoint
-  "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest")
+  "https://router.huggingface.co/hf-inference/models/cardiffnlp/twitter-roberta-base-sentiment")
 
 
 (def huggingface-token (env "HF_TOKEN"))
 
-(defn get-embedding
-  [text]
-  (let [{:keys [exit out err]} (sh ".venv/Scripts/python.exe" "src/bookly/utils/embeddings.py" text)]
-    (if (zero? exit)
-      (vec (json/parse-string out))
-      (throw (ex-info "Python script failed" {:error err})))))
-
-
-(defn dot
-  [v1 v2]
-  (if (not= (count v1) (count v2))
-    (throw (ex-info "Vectors must have the same number of elements" {}))
-    (reduce + 0 (map * v1 v2))))
-
-
-(defn euclidian-norm
-  [v]
-  (Math/sqrt (reduce + (map * v v))))
-
-
-(defn cosine-similarity
-  [v1 v2]
-  (let [dot-prod (dot v1 v2)
-        norm-v1  (euclidian-norm v1)
-        norm-v2  (euclidian-norm v2)]
-    (cond
-      (zero? norm-v1) (throw (ex-info "First vector has zero norm" {:vector :v1}))
-      (zero? norm-v2) (throw (ex-info "Second vector has zero norm" {:vector :v2}))
-      :else (Double/parseDouble (format "%.2f" (/ dot-prod (* norm-v1 norm-v2)))))))
-
-
-(cosine-similarity (get-embedding "Lord of the Rings - Two Towers") (get-embedding "Lord of the Rings - Two Fellowship of the Ring"))
-(cosine-similarity [0 0] [1 1])
-;; ----------------------------------------------------------------------------
-;; Data
-;; ----------------------------------------------------------------------------
-(def users (atom {"LazarZivanovicc" {:id 1
-                                     :first-name "Lazar"
-                                     :last-name "Zivanovic"
-                                     :username "LazarZivanovicc"
-                                     :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
-                                     :created-at (java.util.Date.)
-                                     :updated-at (java.util.Date.)
-                                     :favorite-author "J.K. Rowling"
-                                     :streak {:total 10 :claimed-today false}
-                                     :reading-goals []}
-                  "DusanTrunicc" {:id 2
-                                  :first-name "Dusan",
-                                  :last-name "Trunic",
-                                  :username "DusanTrunicc",
-                                  :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
-                                  :created-at (java.util.Date.)
-                                  :updated-at (java.util.Date.)
-                                  :favorite-author "George Orwell"
-                                  :streak {:total 10 :claimed-today false}
-                                  :reading-goals []}
-                  "AnaDimitricc" {:id 5
-                                  :first-name "Ana",
-                                  :last-name "Dimitric",
-                                  :username "AnaDimitricc",
-                                  :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
-                                  :created-at (java.util.Date.)
-                                  :updated-at (java.util.Date.)
-                                  :favorite-author "George Orwell"
-                                  :streak {:total 10 :claimed-today false}
-                                  :reading-goals []}
-                  "MarijaArsenijevicc" {:id 6
-                                        :first-name "Marija"
-                                        :last-name "Arsenijevic"
-                                        :username "MarijaArsenijevicc"
-                                        :password "bcrypt+sha512$4bb7bccc40015d65cd92b3fed76156ba$12$1afe632da0213da578999030808b0c932c0dd361152b0498"
-                                        :created-at (java.util.Date.)
-                                        :updated-at (java.util.Date.)
-                                        :favorite-author "J.K. Rowling"
-                                        :streak {:total 10 :claimed-today false}
-                                        :reading-goals []}}))
-
-
-(def books (atom [{:id 1
-                   :title "The Hobbit"
-                   :popularity 95
-                   :pages 310
-                   :genres ["Fantasy"]
-                   :streak-cost 5
-                   :author "J.R.R. Tolkien"}
-                  {:id 2
-                   :title "Dune"
-                   :popularity 90
-                   :pages 412
-                   :genres ["Fantasy"]
-                   :streak-cost 5
-                   :author "Frank Herbert"}
-                  {:id 3
-                   :title "The Great Gatsby"
-                   :popularity 85
-                   :pages 180
-                   :genres ["Fiction"]
-                   :streak-cost 3
-                   :author "F. Scott Fitzgerald"}
-                  {:id 4
-                   :title "1984"
-                   :popularity 80
-                   :pages 328
-                   :genres ["Dystopian"]
-                   :streak-cost 4
-                   :author "George Orwell"}
-                  {:id 5
-                   :title "War and Peace"
-                   :popularity 75
-                   :pages 1225
-                   :genres ["Historical Fiction"]
-                   :streak-cost 6
-                   :author "Leo Tolstoy"}]))
-
-(def collections (atom [{:id 1
-                         :user-id 1
-                         :name "Fantasy Favorites"
-                         :description "My favorite fantasy books"
-                         :public true
-                         :created-at (java.util.Date.)
-                         :updated-at (java.util.Date.)}
-                        {:id 2
-                         :user-id 1
-                         :name "To Read in 2025"
-                         :description "Reading list for next year"
-                         :public false
-                         :created-at (java.util.Date.)
-                         :updated-at (java.util.Date.)}]))
-
-(def subscribers (atom [{:collection-id 1
-                         :user-id 2}]))
-
-(def user-book (atom [{:user-id 1
-                       :book-id 1
-                       :collection-id 1
-                       :status "reading"
-                       :progress 164
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 1
-                       :book-id 3
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 1
-                       :book-id 5
-                       :collection-id 2
-                       :status "reading"
-                       :progress 164
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 5
-                       :book-id 1
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 5
-                       :book-id 3
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 5
-                       :book-id 2
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 5
-                       :book-id 7
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 5
-                       :book-id 6
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 6
-                       :book-id 1
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 6
-                       :book-id 3
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 6
-                       :book-id 5
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}
-                      {:user-id 2
-                       :book-id 2
-                       :collection-id nil
-                       :status "want-to-read"
-                       :progress nil
-                       :added-at (java.util.Date.)
-                       :updated-at (java.util.Date.)}]))
-
-(def notes (atom [{:id 1
-                   :user-id 1
-                   :book-id 1
-                   :note "This book is a masterpiece."}]))
-
-
-(def reviews (atom [{:id 1
-                     :user-id 1
-                     :book-id 1
-                     :rating 5
-                     :review "Fantastic book!"
-                     :created-at (java.util.Date.)
-                     :updated-at (java.util.Date.)}
-                    {:id 2
-                     :user-id 2
-                     :book-id 1
-                     :rating 4
-                     :review "Masterpiece"
-                     :created-at (java.util.Date.)
-                     :updated-at (java.util.Date.)}]))
-
 
 (def secret (env "SECRET_KEY"))
+
 ;; ----------------------------------------------------------------------------
 ;; Registration & Login
 ;; ----------------------------------------------------------------------------
-
-;; TODO - Use http helper functions
-;; TODO - Try honeysql
-;; TODO - Add role support - (:identity req) returns claims map so I can pack the role inside claims when creating JWT
-;; And check if the function can be exec by the user with a give role
-
-;; TODO - Check what kind of request or exception should I send if user already exists
 (defn register
   [request]
   (let [first-name (get-in request [:body "first-name"])
@@ -291,7 +48,6 @@
                                      :updated-at (java.util.Date.)
                                      :favorite-author favorite-author})
         {:message (str "User " username " created successfully")}))))
-
 
 (defn login
   [request]
@@ -403,8 +159,6 @@
                         {:type :book-not-found-or-not-currently-reading}))))
     (response-unauthorized "Unauthorized")))
 
-;; Create reading reminder atom
-
 ;; ----------------------------------------------------------------------------
 ;; 6. User Story - Track Reading Progress of a User
 ;; ----------------------------------------------------------------------------
@@ -455,25 +209,31 @@
 ;; 8. User Story - User wants to See Book Reviews
 ;; ----------------------------------------------------------------------------
 (defn get-book-reviews
+  [book-id]
+  (let [book (first (filter #(= (:id %) book-id) @books))
+        book-reviews (filter #(= (:book-id %) book-id) @reviews)]
+    (if book
+      {:reviews book-reviews}
+      (throw (ex-info "Book not found"
+                      {:type :book-not-found
+                       :book-id book-id})))))
+
+(defn book-reviews
   [req]
   (if (authenticated? req)
     (let [book-id (get-in req [:body "book-id"])
-          book (first (filter #(= (:id %) book-id) @books))
-          book-reviews (filter #(= (:book-id %) book-id) @reviews)]
-      (if book
+          book-reviews (get-book-reviews book-id)]
+      (if book-reviews
         (response-ok
-         {:reviews book-reviews})
+         book-reviews)
         (throw (ex-info "Book not found"
                         {:type :book-not-found
                          :book-id book-id}))))
     (response-unauthorized "Unauthorized")))
 
-(get-book-reviews {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}})
-
 ;; ----------------------------------------------------------------------------
 ;; 9. User Story - User Wants to See Overall Sentiment of the Book Reviews
 ;; ----------------------------------------------------------------------------
-
 (defn analyze-sentiment
   [text]
   (let [payload (json/encode {:inputs text})
@@ -484,88 +244,129 @@
                              :as      :json})
         sentiment-vector (first (:body response))
         sentiment (apply max-key :score sentiment-vector)]
-    sentiment))
+    (cond
+      (= (sentiment :label) "LABEL_0") {:label "negative"}
+      (= (sentiment :label) "LABEL_1") {:label "neutral"}
+      :else {:label "positive"})))
 
 
 (defn get-review-sentiment
-  []
-  (let [reviews {"1984" [{:user "Anna" :rating 5 :review "Fantastic book!"}
-                         {:user "John" :rating 4 :review "Depressive!"}]}
-
-        review-sentiment (map (fn [[book revs]]
-                                {book (mapv (fn [r]
-                                              (assoc r :sentiment (:label (analyze-sentiment (:review r)))))
-                                            revs)}) reviews)]
-    (response-ok
-     {:review-sentiment review-sentiment})))
+  [req]
+  (if (authenticated? req)
+    (let [book-id (get-in req [:body "book-id"])
+          reviews (get-book-reviews book-id)
+          all-reviews (reviews :reviews)
+          reviews-with-sentiment (mapv #(assoc % :sentiment (:label (analyze-sentiment (:review %))))
+                                       all-reviews)
+          sentiment-counts (frequencies (map :sentiment reviews-with-sentiment))]
+      (response-ok
+       {:review-sentiment reviews-with-sentiment
+        :totals {:positive (get sentiment-counts "positive" 0)
+                 :negative (get sentiment-counts "negative" 0)
+                 :neutral  (get sentiment-counts "neurtal" 0)}}))
+    (response-unauthorized "Unauthorized")))
+;; ----------------------------------------------------------------------------
+;; 10. User Story - Notify Users About New Book by Their Favorite Author
+;; ----------------------------------------------------------------------------
+(defn notify-users-about-new-book
+  [book-id book-title author]
+  (let [users (filter #(= author (:favorite-author %)) (vals @users))
+        notifications-added
+        (for [user users]
+          (let [notif {:id (inc (or (apply max (map :id @notifications)) 0))
+                       :user-id (:id user)
+                       :type :new-book
+                       :book-id book-id
+                       :message (str "A new book by your favorite author " author " is available: " book-title)}]
+            (swap! notifications conj notif)
+            notif))]
+    {:notifications notifications-added}))
 
 ;; ----------------------------------------------------------------------------
-;; 10. User Story - Notify Users About New Books by Their Favorite Author
-;; ----------------------------------------------------------------------------
-(defn notify-users-about-new-books []
-  (let [users {"LazarZivanovicc" {:favorite-author "J.K. Rowling"}
-               "DusanTrunicc" {:favorite-author "George Orwell"}}
-        new-books {"J.K. Rowling" ["Harry Potter and the Philosopher's Stone"
-                                   "Harry Potter and the Chamber of Secrets"]
-                   "George Orwell" ["1984" "Animal Farm"]}]
-    {:users users
-     :new-books new-books}))
-
-;; ----------------------------------------------------------------------------
-;; 11. User Story - User Subscribes to Someone's Book List - they will get the notification
+;; 11. User Story - User Subscribes to Someone's Book List
 ;; ----------------------------------------------------------------------------
 (defn subscribe-to-collection
-  [username collection-id]
-  (let [user-id (:id (get @users username))
-        new-subscription {:collection-id collection-id :user-id user-id}
-        existing-subscription (first (filter #(and (= user-id (:user-id %))
-                                                   (= collection-id (:collection-id %)))
-                                             @subscribers))]
-    (if existing-subscription
-      (throw (ex-info "User already subscribed to the collection"
-                      {:type :user-already-subscribed}))
-      (swap! subscribers conj new-subscription))))
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          collection-id (get-in req [:body "collection-id"])
+          user-id (:id (get @users username))
+          new-subscription {:collection-id collection-id :user-id user-id}
+          existing-subscription (first (filter #(and (= user-id (:user-id %))
+                                                     (= collection-id (:collection-id %)))
+                                               @subscribers))]
+      (if existing-subscription
+        (throw (ex-info "User already subscribed to the collection"
+                        {:type :user-already-subscribed}))
+        (swap! subscribers conj new-subscription))
+      (response-ok {:new-subscription new-subscription}))
+    (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
 ;; 12. User Story - User Extends his/her Reading Streak by checking-in for a Reading Session  
 ;; ----------------------------------------------------------------------------
-(defn extend-user-streak []
-  (let [user {:streak {:total 10 :claimed-today false}}]
-    (if (not (get-in user [:streak :claimed-today]))
-      (assoc-in (assoc-in user [:streak :claimed-today] true) [:streak :total] (inc (get-in user [:streak :total])))
-      user)))
+(defn extend-user-streak
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          user (get @users username)
+          streak (:streak user)]
+      (if (not (:claimed-today streak))
+        (do
+          (swap! users assoc-in [username :streak :claimed-today] true)
+          (swap! users update-in [username :streak :total] inc)
+          (response-ok {:message "Streak extended!" :streak (get-in @users [username :streak])}))
+        (throw (ex-info "Already claimed today" {:type :streak-already-claimed}))))
+    (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
 ;; 13. User Story - User Spends his Streak to unlock a Book
 ;; ----------------------------------------------------------------------------
-(defn spend-streak-to-unlock-book []
-  (let [user {:streak {:total 10 :claimed-today true}}
-        book {:id 1 :title "The Hobbit" :streak-cost 5}]
-    (if (>= (get-in user [:streak :total]) (:streak-cost book))
-      {:user (assoc-in user [:streak :total] (- (get-in user [:streak :total]) (:streak-cost book)))
-       :message "You have successfully unlocked the book"}
-      {:user user
-       :message "You don't have enough streak to unlock this book"})))
+(defn spend-streak-to-unlock-book
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          user (get @users username)
+          book-id (get-in req [:body "book-id"])
+          book (first (filter #(= (:id %) book-id) @books))]
+      (if (and user book (>= (get-in user [:streak :total]) (:streak-cost book)))
+        (do
+          (swap! users update-in [username :streak :total] #(- % (:streak-cost book)))
+          (let [user-id (:id (get @users username))
+                new-user-book {:user-id user-id
+                               :book-id book-id
+                               :status "want-to-read"
+                               :progress nil
+                               :added-at (java.util.Date.)
+                               :updated-at (java.util.Date.)}]
+            (swap! user-book conj new-user-book)
+            (response-ok {:user-id (:id (get @users username))
+                          :streak (:streak (get @users username))
+                          :message "You have successfully unlocked the book"})))
+        (response-server-error "You don't have enough streak to unlock this book")))
+    (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
 ;; 14. User Story - User Sets and Tracks Personal Reading Goals
 ;; ----------------------------------------------------------------------------
 (defn set-reading-goal
-  [user-id book-id target-date]
-  (let [user (first (filter #(= (:id %) user-id) @users))
-        book (first (filter #(= (:id %) book-id) @books))
-        current-goals (get-in user [:reading-goals] [])
-        new-goal {:book book
-                  :target-date target-date
-                  :status "in-progress"
-                  :created-at (java.util.Date.)}]
-    {:user (assoc user :reading-goals (conj current-goals new-goal))}))
+  [req]
+  (if (authenticated? req)
+    (let [username (get-in req [:identity :username])
+          book-id (get-in req [:body "book-id"])
+          target-date (get-in req [:body "target-date"])
+          book (first (filter #(= (:id %) book-id) @books))
+          new-goal {:book book
+                    :target-date target-date
+                    :status "in-progress"
+                    :created-at (java.util.Date.)}]
+      (swap! users update-in [username :reading-goals] #(conj (or % []) new-goal))
+      (response-ok {:message "Reading goal set successfully."}))
+    (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 15. User Story - User Gets Recommendation from Users that have similar interest like him (Collaborative Filtering)
+;; 15. User Story - User Gets Recommendations 
 ;; ----------------------------------------------------------------------------
-;; Currently I return the most popular books that user has not read yet
-
 (defn jaccard-similarity
   [set-a set-b]
   (let [intersection (count (set/intersection set-a set-b))
@@ -596,13 +397,91 @@
                                            :similarity (jaccard-similarity user-books
                                                                            (get-user-books other-user-id))}) users-rest)))))
 
+
+(defn get-embedding
+  [text]
+  (let [{:keys [exit out err]} (sh ".venv/Scripts/python.exe" "src/bookly/utils/embeddings.py" text)]
+    (if (zero? exit)
+      (vec (json/parse-string out))
+      (throw (ex-info "Python script failed" {:error err})))))
+
+
+(defn dot
+  [v1 v2]
+  (if (not= (count v1) (count v2))
+    (throw (ex-info "Vectors must have the same number of elements" {}))
+    (reduce + 0 (map * v1 v2))))
+
+
+(defn euclidian-norm
+  [v]
+  (Math/sqrt (reduce + (map * v v))))
+
+
+(defn cosine-similarity
+  [v1 v2]
+  (let [dot-prod (dot v1 v2)
+        norm-v1  (euclidian-norm v1)
+        norm-v2  (euclidian-norm v2)]
+    (cond
+      (zero? norm-v1) (throw (ex-info "First vector has zero norm" {:vector :v1}))
+      (zero? norm-v2) (throw (ex-info "Second vector has zero norm" {:vector :v2}))
+      :else (Double/parseDouble (format "%.2f" (/ dot-prod (* norm-v1 norm-v2)))))))
+
+
+(defn find-similar-books
+  [book-id]
+  (let [book (first (filter #(= (:id %) book-id) @books))]
+    (if book
+      (let [title (:title book)
+            author (:author book)
+            genres (:genres book)
+            ;; I will embed string containing title, author, and genres but this can be expaneded
+            embed-str (str title " " author " " genres)
+            book-embedding (get-embedding embed-str)
+            other-books (remove #(= (:id %) book-id) @books)
+            similarities (map (fn [b]
+                                (let [other-title (:title b)
+                                      other-author (:author b)
+                                      other-genres (:genres b)
+                                      other-embed-str (str other-title " " other-author " " other-genres)
+                                      other-embedding (get-embedding other-embed-str)
+                                      sim (cosine-similarity book-embedding other-embedding)]
+                                  (assoc b :similarity sim)))
+                              other-books)
+            sorted-similarities (sort-by :similarity > similarities)
+            top-similar (take 3 sorted-similarities)]
+        {:book-id book-id
+         :title title
+         :most-similar-books top-similar})
+      nil)))
+
+
 (defn recommend-books
-  [user-id]
-  (let [n-nearest-neighbours 10
-        user-books (get-user-books user-id)
-        similar-users-ids (take n-nearest-neighbours (map :user-id (similar-users user-id)))
-        recommended-books (remove #(contains? user-books %) (mapcat get-user-books similar-users-ids))]
-    (sort-by :popularity > (filter #(contains? (set recommended-books) (:id %)) @books))))
+  [req]
+  (if (authenticated? req)
+    (let [user-id (get-in req [:body "user-id"])
+          n-nearest-neighbours 5
+          user-books (get-user-books user-id)
+          user-book-ids (set user-books)
+          similar-users (similar-users user-id)
+          similar-users-ids (map :user-id similar-users)
+          top-similar-users-ids (take n-nearest-neighbours similar-users-ids)
+          similar-users-books (mapcat get-user-books top-similar-users-ids)
+          recommended-book-ids (remove #(contains? user-book-ids %) similar-users-books)
+          collaboration-recommended-books (filter #(contains? (set recommended-book-ids) (:id %)) @books)
+          content-based-similar-books
+          (if (not= 0 (count user-books))
+            ;; I decided to pick one random book from user's books which I will use as a reference when meassuring similarity - this will make the recommender run faster than if I repreated the process for all the books that user has 
+            (let [random-book-id (rand-nth (seq user-books))
+                  result (find-similar-books random-book-id)
+                  all-similar (if result (:most-similar-books result) [])
+                  filtered-books (remove #(contains? user-book-ids (:id %)) all-similar)]
+              (map #(dissoc % :similarity) filtered-books))
+            [])
+          all-recommendations (set (concat collaboration-recommended-books content-based-similar-books))]
+      {:recommendations all-recommendations})
+    (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
 ;; REST

@@ -14,36 +14,39 @@
 
 
 (fact "Test fetching of collection stats"
-      (collection-stats {:identity {:username "LazarZivanovicc"} :body {"collection-id" 1}}) =not=> nil
-      (collection-stats {:identity {:username "LazarZivanovicc"} :body {"collection-id" 1}}) => {:status 200,
-                                                                                                 :body
-                                                                                                 {:user-id 1,
-                                                                                                  :books
-                                                                                                  '({:id 1,
-                                                                                                     :title "The Hobbit",
-                                                                                                     :popularity 95,
-                                                                                                     :pages 310,
-                                                                                                     :genres ["Fantasy"],
-                                                                                                     :streak-cost 5,
-                                                                                                     :author "J.R.R. Tolkien"}),
-                                                                                                  :total-books 1,
-                                                                                                  :total-pages 310,
-                                                                                                  :average-pages 310,
-                                                                                                  :genres #{"Fantasy"}}})
+      (collection-stats {:identity {:username "LazarZivanovicc"}
+                         :body {"collection-id" 1}}) =not=> nil
+      (collection-stats {:identity {:username "LazarZivanovicc"}
+                         :body {"collection-id" 1}}) => {:status 200
+                                                         :body
+                                                         {:user-id 1
+                                                          :books '({:id 1
+                                                                    :title "The Hobbit"
+                                                                    :popularity 95
+                                                                    :pages 310
+                                                                    :genres ["Fantasy"]
+                                                                    :streak-cost 5
+                                                                    :author "J.R.R. Tolkien"})
+                                                          :total-books 1
+                                                          :total-pages 310
+                                                          :average-pages 310
+                                                          :genres #{"Fantasy"}}})
 
 
 (fact "Test recommendations by genre"
-      (recommend-by-genre {:identity {:username "LazarZivanovicc"} :body {"genre" "Fantasy"}}) =not=> nil
-      (recommend-by-genre {:identity {:username "LazarZivanovicc"} :body {"genre" "Fantasy"}}) => {:status 200
-                                                                                                   :body {:genre "Fantasy"
-                                                                                                          :books [{:id 1
-                                                                                                                   :title "The Hobbit"
-                                                                                                                   :author "J.R.R. Tolkien"
-                                                                                                                   :popularity 95}
-                                                                                                                  {:id 2
-                                                                                                                   :title "Dune"
-                                                                                                                   :author "Frank Herbert"
-                                                                                                                   :popularity 90}]}}
+      (recommend-by-genre {:identity {:username "LazarZivanovicc"}
+                           :body {"genre" "Fantasy"}}) =not=> nil
+      (recommend-by-genre {:identity {:username "LazarZivanovicc"}
+                           :body {"genre" "Fantasy"}}) => {:status 200
+                                                           :body {:genre "Fantasy"
+                                                                  :books [{:id 1
+                                                                           :title "The Hobbit"
+                                                                           :author "J.R.R. Tolkien"
+                                                                           :popularity 95}
+                                                                          {:id 2
+                                                                           :title "Dune"
+                                                                           :author "Frank Herbert"
+                                                                           :popularity 90}]}}
 
 
       (recommend-by-genre {:identity {:username "LazarZivanovicc"} :body {"genre" "Mystery"}}) => {:status 200
@@ -54,7 +57,8 @@
 (fact "Test recommendations by user's preferred author"
       (recommend-by-author {:identity {:username "LazarZivanovicc"} :body {}}) =not=> nil
       (recommend-by-author {:identity {:username "LazarZivanovicc"} :body {}}) => {:status 200
-                                                                                   :body {:author "J.K. Rowling" :books ()}})
+                                                                                   :body {:author "J.K. Rowling"
+                                                                                          :books ()}})
 
 
 (fact "Test reading reminder generation"
@@ -74,17 +78,95 @@
 
 
 (fact "Test reading progress tracker"
-      (track-reading-progress {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) =not=> nil
-      (track-reading-progress {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) => {:status 200, :body {:book "The Hobbit", :total-pages 310, :pages-read 164, :progress 52.90322580645161, :pages-left 146}})
+      (track-reading-progress {:identity {:username "LazarZivanovicc"}
+                               :body {"book-id" 1}}) =not=> nil
+      (track-reading-progress {:identity {:username "LazarZivanovicc"}
+                               :body {"book-id" 1}}) => {:status 200
+                                                         :body {:book "The Hobbit"
+                                                                :total-pages 310
+                                                                :pages-read 164
+                                                                :progress 52.90322580645161
+                                                                :pages-left 146}})
 
 
 (fact "Test streak extension"
-      (extend-user-streak) => {:streak {:total 11, :claimed-today true}})
+      (extend-user-streak {:identity {:username "MarijaArsenovic"} :body {}}) =not=> nil
+      (extend-user-streak {:identity {:username "LazarZivanovicc"} :body {}}) => {:status 200
+                                                                                  :body {:message "Streak extended!"
+                                                                                         :streak {:total 11
+                                                                                                  :claimed-today true}}})
 
 
 (fact "Test Book Review fetch"
-      (get-book-reviews {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) =not=> nil
-      (get-book-reviews {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}}) => {:status 200, :body {:reviews [{:id 1, :user-id 1, :book-id 1, :rating 5, :review "Fantastic book!", :created-at #inst "2025-02-04T20:00:52.996-00:00", :updated-at #inst "2025-02-04T20:00:52.996-00:00"} {:id 2, :user-id 2, :book-id 1, :rating 4, :review "Masterpiece", :created-at #inst "2025-02-04T20:00:52.996-00:00", :updated-at #inst "2025-02-04T20:00:52.996-00:00"}]}})
+      (get-book-reviews 1) =not=> nil
+      (get-book-reviews 1) => {:reviews [{:id 1
+                                          :user-id 1
+                                          :book-id 1
+                                          :rating 5
+                                          :review "Fantastic book!"
+                                          :created-at (java.util.Date. 1234567890000)
+                                          :updated-at (java.util.Date. 1234567890000)}
+                                         {:id 2
+                                          :user-id 2
+                                          :book-id 1
+                                          :rating 4
+                                          :review "Masterpiece"
+                                          :created-at (java.util.Date. 1234567890000)
+                                          :updated-at (java.util.Date. 1234567890000)}]})
+
+
+(fact "Test Book Review"
+      (book-reviews {:identity {:username "LazarZivanovicc"}
+                     :body {"book-id" 1}}) =not=> nil
+      (book-reviews {:identity {:username "LazarZivanovicc"}
+                     :body {"book-id" 1}}) => {:status 200
+                                               :body {:reviews [{:id 1
+                                                                 :user-id 1
+                                                                 :book-id 1
+                                                                 :rating 5
+                                                                 :review "Fantastic book!"
+                                                                 :created-at (java.util.Date. 1234567890000)
+                                                                 :updated-at (java.util.Date. 1234567890000)}
+                                                                {:id 2
+                                                                 :user-id 2
+                                                                 :book-id 1
+                                                                 :rating 4
+                                                                 :review "Masterpiece"
+                                                                 :created-at (java.util.Date. 1234567890000)
+                                                                 :updated-at (java.util.Date. 1234567890000)}]}})
+
+
+(fact "Analyze sentiment"
+      (analyze-sentiment "You are amazing!") =not=> nil
+      (analyze-sentiment "You are amazing") => {:label "positive"}
+      (analyze-sentiment "You are terrible!") => {:label "negative"}
+      (analyze-sentiment "How are you?") => {:label "neutral"})
+
+
+(fact "Get reviews and their sentiment"
+      (get-review-sentiment {:identity {:username "LazarZivanovicc"}
+                             :body {"book-id" 1}}) =not=> nil
+      (get-review-sentiment {:identity {:username "LazarZivanovicc"}
+                             :body {"book-id" 1}}) => {:status 200,
+                                                       :body
+                                                       {:review-sentiment
+                                                        [{:id 1,
+                                                          :user-id 1,
+                                                          :book-id 1,
+                                                          :rating 5,
+                                                          :review "Fantastic book!",
+                                                          :created-at (java.util.Date. 1234567890000),
+                                                          :updated-at (java.util.Date. 1234567890000),
+                                                          :sentiment "positive"}
+                                                         {:id 2,
+                                                          :user-id 2,
+                                                          :book-id 1,
+                                                          :rating 4,
+                                                          :review "Masterpiece",
+                                                          :created-at (java.util.Date. 1234567890000),
+                                                          :updated-at (java.util.Date. 1234567890000),
+                                                          :sentiment "neutral"}],
+                                                        :totals {:positive 1, :negative 0, :neutral 0}}})
 
 
 (fact "Registration test"
@@ -145,43 +227,43 @@
 
 (fact "Test collaborative recommendations - new version"
       (recommend-books 1) =not=> nil
-      (recommend-books 1) => '({:id 2, :title "Dune", :popularity 90, :pages 412, :genres ["Fantasy"], :streak-cost 5, :author "Frank Herbert"}))
+      (recommend-books 1) => '({:id 2
+                                :title "Dune"
+                                :popularity 90
+                                :pages 412
+                                :genres ["Fantasy"]
+                                :streak-cost 5
+                                :author "Frank Herbert"}))
 
-(fact "Test get review sentiment function"
-      (get-review-sentiment) =not=> nil
-      (get-review-sentiment) => {:status 200,
-                                 :body
-                                 {:review-sentiment
-                                  '({"1984"
-                                     [{:user "Anna", :rating 5, :review "Fantastic book!", :sentiment "positive"}
-                                      {:user "John", :rating 4, :review "Depressive!", :sentiment "negative"}]})}})
-
-
-(fact "Test notify users about new books"
-      (notify-users-about-new-books) =not=> nil
-      (notify-users-about-new-books) => {:users {"LazarZivanovicc" {:favorite-author "J.K. Rowling"}
-                                                 "DusanTrunicc" {:favorite-author "George Orwell"}}
-                                         :new-books {"J.K. Rowling" ["Harry Potter and the Philosopher's Stone"
-                                                                     "Harry Potter and the Chamber of Secrets"]
-                                                     "George Orwell" ["1984" "Animal Farm"]}})
 
 
 (fact "Test leave personal notes"
-      (leave-personal-note {:identity {:username "LazarZivanovicc"} :body {"book-id" 2 "note" "This book is a great read."}}) =not=> nil
-      (leave-personal-note {:identity {:username "LazarZivanovicc"} :body {"book-id" 1 "note" "This book is a great read."}}) => {:status 200, :body {:message "Note added successfully", :note-id 3, :note "This book is a great read."}})
+      (leave-personal-note {:identity {:username "LazarZivanovicc"}
+                            :body {"book-id" 2
+                                   "note" "This book is a great read."}}) =not=> nil
+      (leave-personal-note {:identity {:username "LazarZivanovicc"}
+                            :body {"book-id" 1
+                                   "note" "This book is a great read."}}) => {:status 200
+                                                                              :body {:message "Note added successfully"
+                                                                                     :note-id 3
+                                                                                     :note "This book is a great read."}})
 
 
 (fact "Test spend streak to unlock book"
-      (spend-streak-to-unlock-book) =not=> nil
-      (spend-streak-to-unlock-book) => {:user {:streak {:total 5, :claimed-today true}}, :message "You have successfully unlocked the book"})
+      (spend-streak-to-unlock-book {:identity {:username "LazarZivanovicc"} :body {"book-id" 6}}) =not=> nil
+      (spend-streak-to-unlock-book {:identity {:username "LazarZivanovicc"} :body {"book-id" 7}}) => {:status 200
+                                                                                                      :body {:user-id 1
+                                                                                                             :streak {:total 0
+                                                                                                                      :claimed-today false}
+                                                                                                             :message "You have successfully unlocked the book"}}
+      (spend-streak-to-unlock-book {:identity {:username "LazarZivanovicc"} :body {"book-id" 5}}) => {:body {:error "You don't have enough streak to unlock this book"}
+                                                                                                      :status 500})
 
 
 (fact "Test set reading goal"
-      (set-reading-goal 1 1 "2025-01-15") =not=> nil
-      (set-reading-goal 1 1 "2025-01-15") => {:user {:reading-goals [{:book {:id 1, :title "The Hobbit", :popularity 95},
-                                                                      :target-date "2025-01-15",
-                                                                      :status "in-progress",
-                                                                      :created-at (java.util.Date.)}]}})
+      (set-reading-goal {:identity {:username "LazarZivanovicc"} :body {"book-id" 6 "target-date" "2025-05-18"}}) =not=> nil
+      (set-reading-goal {:identity {:username "LazarZivanovicc"} :body {"book-id" 7 "target-date" "2025-05-18"}}) => {:status 200
+                                                                                                                      :body {:message "Reading goal set successfully."}})
 
 
 (fact "Test create collection"
@@ -223,13 +305,27 @@
 
 
 (fact "Test subscribe to collection"
-      (subscribe-to-collection "LazarZivanovicc" 1) =not=> nil
-      (subscribe-to-collection "MarijaArsenijevicc" 1) => [{:collection-id 1, :user-id 2} {:collection-id 1, :user-id 1} {:collection-id 1, :user-id 6}])
+      (subscribe-to-collection {:identity {:username "LazarZivanovicc"}
+                                :body {"collection-id" 1}}) =not=> nil
+      (subscribe-to-collection {:identity {:username "MarijaArsenijevicc"}
+                                :body {"collection-id" 1}}) => {:body {:new-subscription {:collection-id 1 :user-id 6}} :status 200})
 
-;; TODO
-;; How can I test my endpoints (app (mock/request :get "/api/collection-stats")) returns error 404? Why? It works in Postman and Browser!
-;; Possibly organize tests in groups (facts is used as a container for multiple fact statements), single simple test case should be represented with a fact
-;; Do tests run immedietly when I start the ring server?
 
-;; CREATE TEST DB THAT I WILL CREATE SEED AND DESTORY
-;; CHECK MIDJE PROVIDED
+(fact "Test dot product function"
+      (dot [1 1] [1 1]) =not=> nil
+      (dot [1 1] [1 2]) => 3
+      (dot [1 1 1] [1 2 3]) => 6
+      (dot [1 2] [1]) => (throws RuntimeException "Vectors must have the same number of elements"))
+
+
+(fact "Test Euclidian norm function"
+      (euclidian-norm [1 1 1 1]) =not=> nil
+      (euclidian-norm [1 1 1 1]) => 2.0
+      (euclidian-norm [3 4]) => 5.0)
+
+
+(fact "Test Cosine Similarity function"
+      (cosine-similarity [1 1 1] [1 1 1]) =not=> nil
+      (cosine-similarity [1000 100 55 47] [1000 100 55 47]) => 1.00
+      (cosine-similarity [-1 0] [1 0]) => -1.00
+      (cosine-similarity [1 0] [0 1]) => 0.00)
