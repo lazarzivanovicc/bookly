@@ -83,6 +83,20 @@ Overall writting Bookly was pretty nice experience and I am really glad I had th
 
 ## Resources
 
+- [Attention is All You Need (Vaswani et al., 2017)](https://arxiv.org/pdf/1706.03762)
+- [BERT: Pre-training of Deep Bidirectional Transformers (Devlin et al., 2019)](https://arxiv.org/pdf/1907.11692)
+- [Buddy Auth](https://github.com/funcool/buddy-auth)
+- [Buddy Sign](https://github.com/funcool/buddy-sign)
+- [Clojure Official Site](https://clojure.org/)
+- [Compojure](https://github.com/weavejester/compojure)
+- [core.matrix](https://github.com/mikera/core.matrix)
+- [Hugging Face Hub](https://huggingface.co/)
+- [Midje](https://github.com/marick/Midje)
+- [Neanderthal](https://github.com/uncomplicate/neanderthal)
+- [Ring](https://github.com/ring-clojure/ring)
+- [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- [twitter-roberta-base-sentiment](https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment)
+
 ## Prerequisites
 
 You will need [Leiningen][] 2.0.0 or above installed.

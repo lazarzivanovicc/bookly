@@ -66,18 +66,7 @@
 ;; ===== User Stories =====
 
 ;; ----------------------------------------------------------------------------
-;; 1. User Story - Generate list of books to read
-;; ----------------------------------------------------------------------------
-(defn generate-reading-list
-  [req]
-  (if (authenticated? req)
-    (let [all-books ["1984" "Brave New World" "The Great Gatsby" "Dune" "The Hobbit"]
-          to-read-count (rand-int 5)]
-      (response-ok {:to-read (take to-read-count (shuffle all-books))}))
-    (response-unauthorized "Unauthorized")))
-
-;; ----------------------------------------------------------------------------
-;; 2. User Story - Generate and View Statistics of Book Collection
+;; 1. User Story - Generate and View Statistics of Book Collection
 ;; ----------------------------------------------------------------------------
 ;; User may have a collection of already read books, a collection of books that he/she is currently reading,
 ;; a collection he/she intends to read or a collection that he recommends to other users
@@ -104,7 +93,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 3. User Story - Get Book Recommendations by Genre
+;; 2. User Story - Get Book Recommendations by Genre
 ;; ----------------------------------------------------------------------------
 (defn recommend-by-genre
   [req]
@@ -118,7 +107,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 4. User Story - Get Book Recommendations by Favorite Author
+;; 3. User Story - Get Book Recommendations by Favorite Author
 ;; ----------------------------------------------------------------------------
 (defn recommend-by-author
   [req]
@@ -133,7 +122,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 5. User Story - User Generates Reading Reminder
+;; 4. User Story - User Generates Reading Reminder
 ;; ----------------------------------------------------------------------------
 (defn create-reading-reminder
   [req]
@@ -160,7 +149,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 6. User Story - Track Reading Progress of a User
+;; 5. User Story - Track Reading Progress of a User
 ;; ----------------------------------------------------------------------------
 (defn track-reading-progress
   [req]
@@ -187,7 +176,7 @@
 (track-reading-progress {:identity {:username "LazarZivanovicc"} :body {"book-id" 1}})
 
 ;; ----------------------------------------------------------------------------
-;; 7. User Story - Leave Personal Note About a Book
+;; 6. User Story - Leave Personal Note About a Book
 ;; ----------------------------------------------------------------------------
 (defn leave-personal-note [req]
   (if (authenticated? req)
@@ -206,7 +195,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 8. User Story - User wants to See Book Reviews
+;; 7. User Story - User wants to See Book Reviews
 ;; ----------------------------------------------------------------------------
 (defn get-book-reviews
   [book-id]
@@ -221,7 +210,7 @@
 (defn book-reviews
   [req]
   (if (authenticated? req)
-    (let [book-id (get-in req [:body "book-id"])
+    (let [book-id (get-in req [:params "book-id"])
           book-reviews (get-book-reviews book-id)]
       (if book-reviews
         (response-ok
@@ -232,7 +221,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 9. User Story - User Wants to See Overall Sentiment of the Book Reviews
+;; 8. User Story - User Wants to See Overall Sentiment of the Book Reviews
 ;; ----------------------------------------------------------------------------
 (defn analyze-sentiment
   [text]
@@ -253,7 +242,7 @@
 (defn get-review-sentiment
   [req]
   (if (authenticated? req)
-    (let [book-id (get-in req [:body "book-id"])
+    (let [book-id (get-in req [:params "book-id"])
           reviews (get-book-reviews book-id)
           all-reviews (reviews :reviews)
           reviews-with-sentiment (mapv #(assoc % :sentiment (:label (analyze-sentiment (:review %))))
@@ -266,7 +255,7 @@
                  :neutral  (get sentiment-counts "neurtal" 0)}}))
     (response-unauthorized "Unauthorized")))
 ;; ----------------------------------------------------------------------------
-;; 10. User Story - Notify Users About New Book by Their Favorite Author
+;; 9. User Story - Notify Users About New Book by Their Favorite Author
 ;; ----------------------------------------------------------------------------
 (defn notify-users-about-new-book
   [book-id book-title author]
@@ -283,7 +272,7 @@
     {:notifications notifications-added}))
 
 ;; ----------------------------------------------------------------------------
-;; 11. User Story - User Subscribes to Someone's Book List
+;; 10. User Story - User Subscribes to Someone's Book List
 ;; ----------------------------------------------------------------------------
 (defn subscribe-to-collection
   [req]
@@ -303,7 +292,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 12. User Story - User Extends his/her Reading Streak by checking-in for a Reading Session  
+;; 11. User Story - User Extends his/her Reading Streak by checking-in for a Reading Session  
 ;; ----------------------------------------------------------------------------
 (defn extend-user-streak
   [req]
@@ -320,7 +309,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 13. User Story - User Spends his Streak to unlock a Book
+;; 12. User Story - User Spends his Streak to unlock a Book
 ;; ----------------------------------------------------------------------------
 (defn spend-streak-to-unlock-book
   [req]
@@ -347,7 +336,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 14. User Story - User Sets and Tracks Personal Reading Goals
+;; 13. User Story - User Sets and Tracks Personal Reading Goals
 ;; ----------------------------------------------------------------------------
 (defn set-reading-goal
   [req]
@@ -365,7 +354,7 @@
     (response-unauthorized "Unauthorized")))
 
 ;; ----------------------------------------------------------------------------
-;; 15. User Story - User Gets Recommendations 
+;; 14. User Story - User Gets Recommendations 
 ;; ----------------------------------------------------------------------------
 (defn jaccard-similarity
   [set-a set-b]

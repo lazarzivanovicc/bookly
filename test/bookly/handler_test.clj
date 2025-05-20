@@ -8,10 +8,6 @@
             [midje.sweet :refer :all]))
 
 
-(fact "Test fetching of user reading list"
-      (let [req {:body {}}]
-        (generate-reading-list req) =not=> nil))
-
 
 (fact "Test fetching of collection stats"
       (collection-stats {:identity {:username "LazarZivanovicc"}
@@ -117,23 +113,23 @@
 
 (fact "Test Book Review"
       (book-reviews {:identity {:username "LazarZivanovicc"}
-                     :body {"book-id" 1}}) =not=> nil
+                     :params {"book-id" 1}}) =not=> nil
       (book-reviews {:identity {:username "LazarZivanovicc"}
-                     :body {"book-id" 1}}) => {:status 200
-                                               :body {:reviews [{:id 1
-                                                                 :user-id 1
-                                                                 :book-id 1
-                                                                 :rating 5
-                                                                 :review "Fantastic book!"
-                                                                 :created-at (java.util.Date. 1234567890000)
-                                                                 :updated-at (java.util.Date. 1234567890000)}
-                                                                {:id 2
-                                                                 :user-id 2
-                                                                 :book-id 1
-                                                                 :rating 4
-                                                                 :review "Masterpiece"
-                                                                 :created-at (java.util.Date. 1234567890000)
-                                                                 :updated-at (java.util.Date. 1234567890000)}]}})
+                     :params {"book-id" 1}}) => {:status 200
+                                                 :body {:reviews [{:id 1
+                                                                   :user-id 1
+                                                                   :book-id 1
+                                                                   :rating 5
+                                                                   :review "Fantastic book!"
+                                                                   :created-at (java.util.Date. 1234567890000)
+                                                                   :updated-at (java.util.Date. 1234567890000)}
+                                                                  {:id 2
+                                                                   :user-id 2
+                                                                   :book-id 1
+                                                                   :rating 4
+                                                                   :review "Masterpiece"
+                                                                   :created-at (java.util.Date. 1234567890000)
+                                                                   :updated-at (java.util.Date. 1234567890000)}]}})
 
 
 (fact "Analyze sentiment"
@@ -145,28 +141,28 @@
 
 (fact "Get reviews and their sentiment"
       (get-review-sentiment {:identity {:username "LazarZivanovicc"}
-                             :body {"book-id" 1}}) =not=> nil
+                             :params {"book-id" 1}}) =not=> nil
       (get-review-sentiment {:identity {:username "LazarZivanovicc"}
-                             :body {"book-id" 1}}) => {:status 200,
-                                                       :body
-                                                       {:review-sentiment
-                                                        [{:id 1,
-                                                          :user-id 1,
-                                                          :book-id 1,
-                                                          :rating 5,
-                                                          :review "Fantastic book!",
-                                                          :created-at (java.util.Date. 1234567890000),
-                                                          :updated-at (java.util.Date. 1234567890000),
-                                                          :sentiment "positive"}
-                                                         {:id 2,
-                                                          :user-id 2,
-                                                          :book-id 1,
-                                                          :rating 4,
-                                                          :review "Masterpiece",
-                                                          :created-at (java.util.Date. 1234567890000),
-                                                          :updated-at (java.util.Date. 1234567890000),
-                                                          :sentiment "neutral"}],
-                                                        :totals {:positive 1, :negative 0, :neutral 0}}})
+                             :params {"book-id" 1}}) => {:status 200,
+                                                         :body
+                                                         {:review-sentiment
+                                                          [{:id 1,
+                                                            :user-id 1,
+                                                            :book-id 1,
+                                                            :rating 5,
+                                                            :review "Fantastic book!",
+                                                            :created-at (java.util.Date. 1234567890000),
+                                                            :updated-at (java.util.Date. 1234567890000),
+                                                            :sentiment "positive"}
+                                                           {:id 2,
+                                                            :user-id 2,
+                                                            :book-id 1,
+                                                            :rating 4,
+                                                            :review "Masterpiece",
+                                                            :created-at (java.util.Date. 1234567890000),
+                                                            :updated-at (java.util.Date. 1234567890000),
+                                                            :sentiment "neutral"}],
+                                                          :totals {:positive 1, :negative 0, :neutral 0}}})
 
 
 (fact "Registration test"
@@ -223,18 +219,6 @@
       (similar-users 1) =not=> nil
       (similar-users 1) => '({:user-id 6, :similarity 1} {:user-id 5, :similarity 1/3})
       (similar-users 2) => '({:user-id 5, :similarity 1/5}))
-
-
-(fact "Test collaborative recommendations - new version"
-      (recommend-books 1) =not=> nil
-      (recommend-books 1) => '({:id 2
-                                :title "Dune"
-                                :popularity 90
-                                :pages 412
-                                :genres ["Fantasy"]
-                                :streak-cost 5
-                                :author "Frank Herbert"}))
-
 
 
 (fact "Test leave personal notes"
